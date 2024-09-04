@@ -24,12 +24,24 @@ const sendContactEmail = async (email, name, phoneNumber, reason, comments) => {
       .replace("{{comments}}", comments);
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      //service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // true for SSL, false for TLS
       auth: {
         user: EMAIL,
         pass: PASSWORD,
       },
     });
+    // let transporter = nodemailer.createTransport({
+    //   host: emailInfo.host, // Custom SMTP host (e.g., smtp.yourdomain.com)
+    //   port: emailInfo.port, // Typically 465 for SSL or 587 for TLS
+    //   secure: emailInfo.secure, // true for SSL, false for TLS
+    //   auth: {
+    //     user: emailInfo.emailId, // Your email address
+    //     pass: emailInfo.password, // Your email password
+    //   },
+    // });
     const mailOptions = {
       from: EMAIL,
       to: EMAIL,
