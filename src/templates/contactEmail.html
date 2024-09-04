@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Form Submission</title>
+  </head>
+
+  <body style="font-family: Arial, sans-serif">
+    <div
+      style="
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      "
+    >
+      <h2 style="color: #333">New Contact Form Submission</h2>
+      <p>Hello,</p>
+      <p>
+        You have received a new contact form submission with the following
+        details:
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px">
+        <tr>
+          <td
+            style="
+              padding: 8px;
+              border: 1px solid #ddd;
+              background-color: #f9f9f9;
+              font-weight: bold;
+            "
+          >
+            Name:
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd">{{name}}</td>
+        </tr>
+        <tr>
+          <td
+            style="
+              padding: 8px;
+              border: 1px solid #ddd;
+              background-color: #f9f9f9;
+              font-weight: bold;
+            "
+          >
+            Email:
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd">{{email}}</td>
+        </tr>
+        <tr>
+          <td
+            style="
+              padding: 8px;
+              border: 1px solid #ddd;
+              background-color: #f9f9f9;
+              font-weight: bold;
+            "
+          >
+            Phone Number:
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd">{{phoneNumber}}</td>
+        </tr>
+        <tr>
+          <td
+            style="
+              padding: 8px;
+              border: 1px solid #ddd;
+              background-color: #f9f9f9;
+              font-weight: bold;
+            "
+          >
+            Reason:
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd">{{reason}}</td>
+        </tr>
+        <tr>
+          <td
+            style="
+              padding: 8px;
+              border: 1px solid #ddd;
+              background-color: #f9f9f9;
+              font-weight: bold;
+            "
+          >
+            Comments:
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd">{{comments}}</td>
+        </tr>
+      </table>
+      <p style="margin-top: 20px">Thank you,</p>
+      <!-- <p>Your Website Team</p> -->
+    </div>
+  </body>
+</html>
