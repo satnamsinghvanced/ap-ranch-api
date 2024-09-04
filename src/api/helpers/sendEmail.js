@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import config from "../../../config.js";
+const { EMAIL, PASSWORD } = config;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,13 +26,13 @@ const sendContactEmail = async (email, name, phoneNumber, reason, comments) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "sanjaynabha7@gmail.com",
-        pass: "tmdg most tkdh jygo",
+        user: EMAIL,
+        pass: PASSWORD,
       },
     });
     const mailOptions = {
-      from: "sanjaynabha7@gmail.com",
-      to: "sanjaynabha7@gmail.com",
+      from: EMAIL,
+      to: EMAIL,
       subject: "Contact Us",
       html: formattedEmailTemplate,
       // text: `Please click the following link to verify your email:
