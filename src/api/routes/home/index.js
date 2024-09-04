@@ -17,7 +17,6 @@ router.post("/", async (req, res) => {
     );
     const bannerId = bannerResult.insertId;
 
-
     // Insert associated partner logos
     for (const logo of partnerLogo) {
       await connection.query(
@@ -105,7 +104,6 @@ router.get("/detail", async (req, res) => {
     }
 
     const banner = bannerRows[0];
-
 
     // Fetch partner logos related to the banner
     const [partnerLogoRows] = await connection.query(
@@ -196,7 +194,7 @@ router.put("/", async (req, res) => {
 
     // Update donate info
     await connection.query(
-      `UPDATE donate SET text = ?, buttonText = ?, image = ? WHERE id = ?`,
+      `UPDATE donate SET text = ?, buttonText = ?, image = ? WHERE bannerId = ?`,
       [donate.text, donate.buttonText, donate.image, bannerId]
     );
     await connection.commit();
