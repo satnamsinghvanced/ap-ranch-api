@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
     //   `INSERT INTO contactForm (name, email, phoneNumber, reason, comments) VALUES (?, ?, ?, ?, ?)`,
     //   [name, email, phoneNumber, reason, comments]
     // );
-    sendContactEmail(name, email, phoneNumber, reason, comments);
+    await sendContactEmail(name, email, phoneNumber, reason, comments);
     // console.log(contactForm);
     // connection.release();
     res.status(201).json({ message: "Data uploaded successfully" });
@@ -23,7 +23,5 @@ router.post("/", async (req, res) => {
     console.log(err);
   }
 });
-
-
 
 export default router;
