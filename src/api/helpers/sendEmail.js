@@ -33,22 +33,11 @@ const sendContactEmail = async (email, name, phoneNumber, reason, comments) => {
         pass: PASSWORD,
       },
     });
-    // let transporter = nodemailer.createTransport({
-    //   host: emailInfo.host, // Custom SMTP host (e.g., smtp.yourdomain.com)
-    //   port: emailInfo.port, // Typically 465 for SSL or 587 for TLS
-    //   secure: emailInfo.secure, // true for SSL, false for TLS
-    //   auth: {
-    //     user: emailInfo.emailId, // Your email address
-    //     pass: emailInfo.password, // Your email password
-    //   },
-    // });
     const mailOptions = {
       from: EMAIL,
       to: EMAIL,
       subject: "Contact Us",
-      html: formattedEmailTemplate,
-      // text: `Please click the following link to verify your email:
-      //          ${verificationLink}`,
+      //html: formattedEmailTemplate,
     };
     const info = await transporter.sendMail(mailOptions);
     //console.log("Email sent successfully:", info);
