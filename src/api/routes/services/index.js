@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
     await connection.beginTransaction();
     const [serviceResult] = await connection.query(
       `INSERT INTO services (serviceDescriptions, servicesImage, servicesName) VALUES (?, ?, ?)`,
-      [servicesImage, servicesName, serviceDescriptions]
+      [serviceDescriptions, servicesImage, servicesName]
     );
     const serviceId = serviceResult.insertId;
 
