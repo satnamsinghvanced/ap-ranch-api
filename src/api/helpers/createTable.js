@@ -103,6 +103,16 @@ CREATE TABLE IF NOT EXISTS team (
 );
 `;
 
+// Create about table
+const createAboutTable = `
+CREATE TABLE IF NOT EXISTS about (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  image VARCHAR(255),
+  name VARCHAR(255),
+  descriptions TEXT
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -116,6 +126,7 @@ export const createTables = async () => {
     await connection.query(createFacilityTable);
     await connection.query(createFacilityDetailTable);
     await connection.query(createTheTeamTable);
+    await connection.query(createAboutTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

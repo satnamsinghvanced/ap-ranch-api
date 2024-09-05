@@ -4,16 +4,16 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { image, name, descriptions, role } = req.body;
+    const { image, name, descriptions } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
-    const [team] = await connection.query(
-      `INSERT INTO team (image, name, descriptions,role) VALUES (?, ?, ?, ?)`,
-      [image, name, descriptions, role]
+    await connection.query(
+      `INSERT INTO about (image, name, descriptions) VALUES (?, ?, ?)`,
+      [image, name, descriptions]
     );
     await connection.commit();
     connection.release();
-    res.status(201).json({ message: "Team member added successfully" });
+    res.status(201).json({ message: "About added successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
@@ -23,40 +23,21 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [teamMembers] = await connection.query("SELECT * FROM team");
+    const [about] = await connection.query("SELECT * FROM about");
     connection.release();
-    res.status(200).json(teamMembers);
+    res.status(200).json(about);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
   }
 });
-router.get("/detail", async (req, res) => {
-  const { id } = req.query;
-  try {
-    const connection = await pool.getConnection();
-    const [teamMember] = await connection.query(
-      "SELECT * FROM team WHERE id = ?",
-      [id]
-    );
 
-    if (teamMember.length === 0) {
-      return res.status(404).json({ msg: "Team member not found" });
-    }
-
-    connection.release();
-    res.status(200).json(teamMember[0]);
-  } catch (err) {
-    res.status(500).json({ msg: "Server error" });
-    console.log(err);
-  }
-});
 router.put("/", async (req, res) => {
   const { id } = req.query;
-  const { image, name, descriptions, role } = req.body;
+  const { image, name, descriptions } = req.body;
 
   // Check if the required fields are present
-  if (!image || !name || !descriptions || !role) {
+  if (!image || !name || !descriptions) {
     return res.status(400).json({ msg: "All fields are required" });
   }
 
@@ -65,24 +46,25 @@ router.put("/", async (req, res) => {
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      `UPDATE team SET image = ?, name = ?, descriptions = ?, role = ? WHERE id = ?`,
-      [image, name, descriptions, role, id]
+      `UPDATE about SET image = ?, name = ?, descriptions = ? WHERE id = ?`,
+      [image, name, descriptions, id]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ msg: "Team member not found" });
+      return res.status(404).json({ msg: "About not found" });
     }
 
     await connection.commit();
     connection.release();
 
-    res.status(200).json({ message: "Team member updated successfully" });
+    res.status(200).json({ message: "About updated successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.log(err);
   }
 });
+
 router.delete("/", async (req, res) => {
   const { id } = req.query;
 
@@ -90,22 +72,23 @@ router.delete("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [result] = await connection.query("DELETE FROM team WHERE id = ?", [
+    const [result] = await connection.query("DELETE FROM about WHERE id = ?", [
       id,
     ]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ msg: "Team member not found" });
+      return res.status(404).json({ msg: "About not found" });
     }
 
     await connection.commit();
     connection.release();
 
-    res.status(200).json({ message: "Team member deleted successfully" });
+    res.status(200).json({ message: "About deleted successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.log(err);
   }
 });
+
 export default router;
