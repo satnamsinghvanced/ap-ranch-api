@@ -6,7 +6,7 @@ import config from "./config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 //import "./src/db/index.js";
-// import pool from "./src/db/index.js";
+import pool from "./src/db/index.js";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,15 +28,15 @@ app.use("/api", routes);
 
 app.use("/public", express.static("./public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// pool
-//   .query("SELECT 1")
-//   .then(() => {
-//     console.log("Connected to MySQL");
+pool
+  .query("SELECT 1")
+  .then(() => {
+    console.log("Connected to MySQL");
     app.listen(PORT, () => {
       console.log("Server is running..." + PORT);
     });
-  // })
-  // .catch((error) => {
-  //   console.error("Unable to connect to MySQL:", error.message);
-  //   process.exit(1);
-  // });
+  })
+  .catch((error) => {
+    console.error("Unable to connect to MySQL:", error.message);
+    process.exit(1);
+  });
