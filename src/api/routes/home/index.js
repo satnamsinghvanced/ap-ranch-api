@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
     await connection.beginTransaction();
     // Insert into banner table
     const [bannerResult] = await connection.query(
-      `INSERT INTO banner (bannerImage, logoImage, descriptions) VALUES (?, ?, ?)`,
+      `INSERT INTO banners (bannerImage, logoImage, descriptions) VALUES (?, ?, ?)`,
       [banner.bannerImage, banner.logoImage, banner.descriptions]
     );
     const bannerId = bannerResult.insertId;
@@ -18,14 +18,14 @@ router.post("/", async (req, res) => {
     // Insert associated partner logos
     for (const logo of partnerLogo) {
       await connection.query(
-        `INSERT INTO partnerLogo (bannerId, logo) VALUES (?, ?)`,
+        `INSERT INTO partnerLogos (bannerId, logo) VALUES (?, ?)`,
         [bannerId, logo.logo]
       );
     }
 
     // Insert donate info
     await connection.query(
-      `INSERT INTO donate (bannerId, text, buttonText, image) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO donates (bannerId, text, buttonText, image) VALUES (?, ?, ?, ?)`,
       [bannerId, donate.text, donate.buttonText, donate.image]
     );
     await connection.commit();
@@ -44,7 +44,7 @@ router.get("/", async (req, res) => {
     const connection = await pool.getConnection();
 
     // Fetch all banners
-    const [banners] = await connection.query("SELECT * FROM banner");
+    const [banners] = await connection.query("SELECT * FROM banners");
 
     if (banners.length === 0) {
       connection.release();
@@ -52,10 +52,10 @@ router.get("/", async (req, res) => {
     }
 
     // Fetch all partner logos
-    const [partnerLogos] = await connection.query("SELECT * FROM partnerLogo");
+    const [partnerLogos] = await connection.query("SELECT * FROM partnerLogos");
 
     // Fetch all donate information
-    const [donates] = await connection.query("SELECT * FROM donate");
+    const [donates] = await connection.query("SELECT * FROM donates");
 
     connection.release();
 
@@ -92,7 +92,7 @@ router.get("/detail", async (req, res) => {
 
     // Fetch banner details
     const [bannerRows] = await connection.query(
-      "SELECT * FROM banner WHERE id = ?",
+      "SELECT * FROM banners WHERE id = ?",
       [bannerId]
     );
 
@@ -105,13 +105,13 @@ router.get("/detail", async (req, res) => {
 
     // Fetch partner logos related to the banner
     const [partnerLogoRows] = await connection.query(
-      "SELECT * FROM partnerLogo WHERE bannerId = ?",
+      "SELECT * FROM partnerLogos WHERE bannerId = ?",
       [bannerId]
     );
 
     // Fetch donate information
     const [donateRows] = await connection.query(
-      "SELECT * FROM donate WHERE bannerId = ?",
+      "SELECT * FROM donates WHERE bannerId = ?",
       [bannerId]
     );
 
@@ -143,15 +143,15 @@ router.delete("/", async (req, res) => {
     await connection.beginTransaction();
 
     // Delete associated partner logos
-    await connection.query("DELETE FROM partnerLogo WHERE bannerId = ?", [
+    await connection.query("DELETE FROM partnerLogos WHERE bannerId = ?", [
       bannerId,
     ]);
 
     // Delete banner record
-    await connection.query("DELETE FROM banner WHERE id = ?", [bannerId]);
+    await connection.query("DELETE FROM banners WHERE id = ?", [bannerId]);
 
     // Delete donate record
-    await connection.query("DELETE FROM donate WHERE id = ?", [bannerId]);
+    await connection.query("DELETE FROM donates WHERE id = ?", [bannerId]);
     await connection.commit();
     connection.release();
 
@@ -174,25 +174,25 @@ router.put("/", async (req, res) => {
     await connection.beginTransaction();
     // Update banner table
     await connection.query(
-      `UPDATE banner SET bannerImage = ?, logoImage = ?, descriptions = ? WHERE id = ?`,
+      `UPDATE banners SET bannerImage = ?, logoImage = ?, descriptions = ? WHERE id = ?`,
       [banner.bannerImage, banner.logoImage, banner.descriptions, bannerId]
     );
 
-    await connection.query("DELETE FROM partnerLogo WHERE bannerId = ?", [
+    await connection.query("DELETE FROM partnerLogos WHERE bannerId = ?", [
       bannerId,
     ]);
 
     // Insert updated partner logos
     for (const logo of partnerLogo) {
       await connection.query(
-        `INSERT INTO partnerLogo (bannerId, logo) VALUES (?, ?)`,
+        `INSERT INTO partnerLogos (bannerId, logo) VALUES (?, ?)`,
         [bannerId, logo.logo]
       );
     }
 
     // Update donate info
     await connection.query(
-      `UPDATE donate SET text = ?, buttonText = ?, image = ? WHERE bannerId = ?`,
+      `UPDATE donates SET text = ?, buttonText = ?, image = ? WHERE bannerId = ?`,
       [donate.text, donate.buttonText, donate.image, bannerId]
     );
     await connection.commit();

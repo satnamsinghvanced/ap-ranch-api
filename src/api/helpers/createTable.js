@@ -1,6 +1,6 @@
 import pool from "../../db/index.js";
 const createBannerTable = `
-CREATE TABLE IF NOT EXISTS banner (
+CREATE TABLE IF NOT EXISTS banners (
   id INT AUTO_INCREMENT PRIMARY KEY,
   bannerImage VARCHAR(255),
   logoImage VARCHAR(255),
@@ -41,28 +41,28 @@ CREATE TABLE IF NOT EXISTS serviceProvided (
 
 // Create partnerLogo table
 const createPartnerLogoTable = `
-CREATE TABLE IF NOT EXISTS partnerLogo (
+CREATE TABLE IF NOT EXISTS partnerLogos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   bannerId INT,
   logo VARCHAR(255),
-  FOREIGN KEY (bannerId) REFERENCES banner(id) ON DELETE CASCADE
+  FOREIGN KEY (bannerId) REFERENCES banners(id) ON DELETE CASCADE
 );
 `;
 
 // Create donate table
 const createDonateTable = `
-CREATE TABLE IF NOT EXISTS donate (
+CREATE TABLE IF NOT EXISTS donates (
   id INT AUTO_INCREMENT PRIMARY KEY,
   bannerId INT,
   text TEXT,
   buttonText VARCHAR(255),
   image VARCHAR(255),
-  FOREIGN KEY (bannerId) REFERENCES banner(id) ON DELETE CASCADE
+  FOREIGN KEY (bannerId) REFERENCES banners(id) ON DELETE CASCADE
 );`;
 
 //Create contact form
 const createContactForm = `
-CREATE TABLE IF NOT EXISTS contactForm (
+CREATE TABLE IF NOT EXISTS contactForms (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS contactForm (
 
 // Create facility table
 const createFacilityTable = `
-CREATE TABLE IF NOT EXISTS facility (
+CREATE TABLE IF NOT EXISTS facilities (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image VARCHAR(255),
   name VARCHAR(255)
@@ -83,18 +83,18 @@ CREATE TABLE IF NOT EXISTS facility (
 
 // Create facility detail table
 const createFacilityDetailTable = `
-CREATE TABLE IF NOT EXISTS facilityDetail (
+CREATE TABLE IF NOT EXISTS facilityDetails (
   id INT AUTO_INCREMENT PRIMARY KEY,
   facilityId INT,
   facilityImage VARCHAR(255),
   facilityName VARCHAR(255),
-  FOREIGN KEY (facilityId) REFERENCES facility(id) ON DELETE CASCADE
+  FOREIGN KEY (facilityId) REFERENCES facilities(id) ON DELETE CASCADE
 );
 `;
 
 // Create team table
 const createTheTeamTable = `
-CREATE TABLE IF NOT EXISTS team (
+CREATE TABLE IF NOT EXISTS teams (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image VARCHAR(255),
   name VARCHAR(255),
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS team (
 
 // Create about table
 const createAboutTable = `
-CREATE TABLE IF NOT EXISTS about (
+CREATE TABLE IF NOT EXISTS abouts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image VARCHAR(255),
   name VARCHAR(255),

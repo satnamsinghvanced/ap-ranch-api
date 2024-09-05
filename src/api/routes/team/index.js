@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     const [team] = await connection.query(
-      `INSERT INTO team (image, name, descriptions,role) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO teams (image, name, descriptions,role) VALUES (?, ?, ?, ?)`,
       [image, name, descriptions, role]
     );
     await connection.commit();
@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [teamMembers] = await connection.query("SELECT * FROM team");
+    const [teamMembers] = await connection.query("SELECT * FROM teams");
     connection.release();
     res.status(200).json(teamMembers);
   } catch (err) {
@@ -36,7 +36,7 @@ router.get("/detail", async (req, res) => {
   try {
     const connection = await pool.getConnection();
     const [teamMember] = await connection.query(
-      "SELECT * FROM team WHERE id = ?",
+      "SELECT * FROM teams WHERE id = ?",
       [id]
     );
 
@@ -65,7 +65,7 @@ router.put("/", async (req, res) => {
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      `UPDATE team SET image = ?, name = ?, descriptions = ?, role = ? WHERE id = ?`,
+      `UPDATE teams SET image = ?, name = ?, descriptions = ?, role = ? WHERE id = ?`,
       [image, name, descriptions, role, id]
     );
 
@@ -90,7 +90,7 @@ router.delete("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [result] = await connection.query("DELETE FROM team WHERE id = ?", [
+    const [result] = await connection.query("DELETE FROM teams WHERE id = ?", [
       id,
     ]);
 

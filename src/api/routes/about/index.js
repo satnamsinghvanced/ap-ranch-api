@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
-      `INSERT INTO about (image, name, descriptions) VALUES (?, ?, ?)`,
+      `INSERT INTO abouts (image, name, descriptions) VALUES (?, ?, ?)`,
       [image, name, descriptions]
     );
     await connection.commit();
@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [about] = await connection.query("SELECT * FROM about");
+    const [about] = await connection.query("SELECT * FROM abouts");
     connection.release();
     res.status(200).json(about);
   } catch (err) {
@@ -46,7 +46,7 @@ router.put("/", async (req, res) => {
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      `UPDATE about SET image = ?, name = ?, descriptions = ? WHERE id = ?`,
+      `UPDATE abouts SET image = ?, name = ?, descriptions = ? WHERE id = ?`,
       [image, name, descriptions, id]
     );
 
@@ -72,7 +72,7 @@ router.delete("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [result] = await connection.query("DELETE FROM about WHERE id = ?", [
+    const [result] = await connection.query("DELETE FROM abouts WHERE id = ?", [
       id,
     ]);
 

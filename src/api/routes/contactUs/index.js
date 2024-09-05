@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     const [contactForm] = await connection.query(
-      `INSERT INTO contactForm (name, email, phoneNumber, reason, comments) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO contactForms (name, email, phoneNumber, reason, comments) VALUES (?, ?, ?, ?, ?)`,
       [name, email, phoneNumber, reason, comments]
     );
     await sendContactEmail(name, email, phoneNumber, reason, comments);

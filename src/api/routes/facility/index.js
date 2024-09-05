@@ -8,14 +8,14 @@ router.post("/", async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     const [facilityData] = await connection.query(
-      `INSERT INTO facility (name, image) VALUES (?, ?)`,
+      `INSERT INTO facilities (name, image) VALUES (?, ?)`,
       [name, image]
     );
     const facilityId = facilityData.insertId;
 
     for (const facilityDetail of facility) {
       await connection.query(
-        `INSERT INTO facilityDetail (facilityId, facilityName, facilityImage) VALUES (?, ?, ?)`,
+        `INSERT INTO facilityDetails (facilityId, facilityName, facilityImage) VALUES (?, ?, ?)`,
         [facilityId, facilityDetail.facilityName, facilityDetail.facilityImage]
       );
     }
@@ -31,9 +31,9 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [facilityData] = await connection.query("SELECT * FROM facility");
+    const [facilityData] = await connection.query("SELECT * FROM facilities");
     const [facilityDetails] = await connection.query(
-      "SELECT * FROM facilityDetail"
+      "SELECT * FROM facilityDetails"
     );
     const facility = facilityData.map((x) => {
       const facilityDetail = facilityDetails.filter(
@@ -62,19 +62,19 @@ router.put("/", async (req, res) => {
 
     // Update the facility data
     await connection.query(
-      `UPDATE facility SET name = ?, image = ? WHERE id = ?`,
+      `UPDATE facilities SET name = ?, image = ? WHERE id = ?`,
       [name, image, id]
     );
 
     // Delete existing facility details for the given facilityId
-    await connection.query(`DELETE FROM facilityDetail WHERE facilityId = ?`, [
+    await connection.query(`DELETE FROM facilityDetails WHERE facilityId = ?`, [
       id,
     ]);
 
     // Insert updated facility details
     for (const facilityDetail of facility) {
       await connection.query(
-        `INSERT INTO facilityDetail (facilityId, facilityName, facilityImage) VALUES (?, ?, ?)`,
+        `INSERT INTO facilityDetails (facilityId, facilityName, facilityImage) VALUES (?, ?, ?)`,
         [id, facilityDetail.facilityName, facilityDetail.facilityImage]
       );
     }
@@ -99,12 +99,12 @@ router.delete("/", async (req, res) => {
     await connection.beginTransaction();
 
     // Delete the facility details first to avoid foreign key constraint issues
-    await connection.query(`DELETE FROM facilityDetail WHERE facilityId = ?`, [
+    await connection.query(`DELETE FROM facilityDetails WHERE facilityId = ?`, [
       id,
     ]);
 
     // Delete the facility itself
-    await connection.query(`DELETE FROM facility WHERE id = ?`, [id]);
+    await connection.query(`DELETE FROM facilities WHERE id = ?`, [id]);
 
     await connection.commit();
     connection.release();
