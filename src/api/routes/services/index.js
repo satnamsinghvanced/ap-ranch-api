@@ -11,13 +11,6 @@ router.post("/", async (req, res) => {
       images,
       providedServices,
     } = req.body;
-    console.log(
-      servicesImage,
-      servicesName,
-      serviceDescriptions,
-      images,
-      providedServices
-    );
 
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -42,6 +35,7 @@ router.post("/", async (req, res) => {
         [serviceId, serviceProvided.title, serviceProvided.descriptions]
       );
     }
+    await connection.commit();
     connection.release();
     res.status(201).json({ message: "Data uploaded successfully" });
   } catch (err) {
@@ -69,7 +63,7 @@ router.get("/", async (req, res) => {
       );
 
       return {
-        ...service,
+        service,
         images: serviceImages,
         providedServices: serviceProvidedDetails,
       };
@@ -84,8 +78,6 @@ router.get("/", async (req, res) => {
 
 router.get("/detail", async (req, res) => {
   const { serviceId } = req.query;
-  console.log(serviceId);
-
   try {
     const connection = await pool.getConnection();
 

@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS donate (
   FOREIGN KEY (bannerId) REFERENCES banner(id) ON DELETE CASCADE
 );`;
 
+//Create contact form
 const createContactForm = `
 CREATE TABLE IF NOT EXISTS contactForm (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,6 +69,37 @@ CREATE TABLE IF NOT EXISTS contactForm (
   phoneNumber VARCHAR(20) NOT NULL,
   reason VARCHAR(255) NOT NULL,
   comments TEXT NOT NULL
+);
+`;
+
+// Create facility table
+const createFacilityTable = `
+CREATE TABLE IF NOT EXISTS facility (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  image VARCHAR(255),
+  name VARCHAR(255)
+);
+`;
+
+// Create facility detail table
+const createFacilityDetailTable = `
+CREATE TABLE IF NOT EXISTS facilityDetail (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  facilityId INT,
+  facilityImage VARCHAR(255),
+  facilityName VARCHAR(255),
+  FOREIGN KEY (facilityId) REFERENCES facility(id) ON DELETE CASCADE
+);
+`;
+
+// Create team table
+const createTheTeamTable = `
+CREATE TABLE IF NOT EXISTS team (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  image VARCHAR(255),
+  name VARCHAR(255),
+  descriptions TEXT,
+  role VARCHAR(255)
 );
 `;
 
@@ -81,6 +113,9 @@ export const createTables = async () => {
     await connection.query(createServicesImageTable);
     await connection.query(createProvidedServicedTable);
     await connection.query(createContactForm);
+    await connection.query(createFacilityTable);
+    await connection.query(createFacilityDetailTable);
+    await connection.query(createTheTeamTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

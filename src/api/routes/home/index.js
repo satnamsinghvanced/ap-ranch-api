@@ -1,12 +1,10 @@
 import express from "express";
-import { createTables } from "../../helpers/createTable.js";
 import upload from "../../../middleware/multer.js";
 import pool from "../../../db/index.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    await createTables();
     const { donate, partnerLogo, banner } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -30,7 +28,7 @@ router.post("/", async (req, res) => {
       `INSERT INTO donate (bannerId, text, buttonText, image) VALUES (?, ?, ?, ?)`,
       [bannerId, donate.text, donate.buttonText, donate.image]
     );
-
+    await connection.commit();
     connection.release();
     console.log("Data inserted successfully");
 

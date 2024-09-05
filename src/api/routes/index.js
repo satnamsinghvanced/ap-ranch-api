@@ -1,9 +1,15 @@
 import express from "express";
-// import home from "./home/index.js";
+import home from "./home/index.js";
 import contact from "./contactUs/index.js";
-// import service from "./services/index.js";
+import service from "./services/index.js";
+import facility from "./facility/index.js";
+import team from "./team/index.js";
+import createTable from "./createTable/index.js";
 const router = express.Router();
 // router.use("/home", home);
 router.use("/contact", contact);
 // router.use("/service", service);
+// router.use("/facility", facility);
+// router.use("/team", team);
+// router.use("/createTable", createTable);
 export default router;
