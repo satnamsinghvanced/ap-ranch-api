@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
     await sendContactEmail(name, email, phoneNumber, reason, comments);
     await connection.commit();
     connection.release();
-    res.status(201).json({ message: "Data uploaded successfully" });
+    res.status(201).json({ message: "Thank you for submit." });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);

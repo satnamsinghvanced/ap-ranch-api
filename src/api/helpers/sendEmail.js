@@ -8,7 +8,7 @@ const { EMAIL, PASSWORD } = config;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const sendContactEmail = async (email, name, phoneNumber, reason, comments) => {
+const sendContactEmail = async (name, email, phoneNumber, reason, comments) => {
   try {
     const templatePath = path.join(
       __dirname,
@@ -33,9 +33,10 @@ const sendContactEmail = async (email, name, phoneNumber, reason, comments) => {
         pass: PASSWORD,
       },
     });
+
     const mailOptions = {
       from: EMAIL,
-      to: EMAIL,
+      to: `${EMAIL}, ${email}, mark@oboideas.com`,
       subject: "Contact Us",
       html: formattedEmailTemplate,
     };
