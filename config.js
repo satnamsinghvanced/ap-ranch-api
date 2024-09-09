@@ -10,6 +10,7 @@ const {
   EMAIL,
   PASSWORD,
   JWT_SECRET,
+  SQUARE_ACCESS_TOKEN,
 } = process.env;
 
 export default {
@@ -22,4 +23,5 @@ export default {
   EMAIL,
   PASSWORD,
   JWT_SECRET,
+  SQUARE_ACCESS_TOKEN,
 };

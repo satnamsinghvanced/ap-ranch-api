@@ -145,6 +145,21 @@ CREATE TABLE IF NOT EXISTS auth (
 );
 `;
 
+const createPaymentTable = `
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  paymentId VARCHAR(255) NOT NULL,
+  firstName VARCHAR(255) NOT NULL,
+  lastName VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  state VARCHAR(100),
+  amount DECIMAL(10, 2) NOT NULL,
+  status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -160,6 +175,7 @@ export const createTables = async () => {
     await connection.query(createTheTeamTable);
     await connection.query(createAboutTable);
     await connection.query(createAuthTable);
+    await connection.query(createPaymentTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {
