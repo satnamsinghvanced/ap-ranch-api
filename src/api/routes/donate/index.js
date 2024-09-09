@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
       sourceId,
       amountMoney: {
         currency: "USD",
-        amount: amount,
+        amount: Math.round(amount * 100),
       },
       location_id: LOCATION_ID,
       buyerEmailAddress: email,
