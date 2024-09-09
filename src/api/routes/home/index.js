@@ -1,9 +1,10 @@
 import express from "express";
 import upload from "../../../middleware/multer.js";
 import pool from "../../../db/index.js";
+import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const { donate, partnerLogo, banner } = req.body;
     const connection = await pool.getConnection();
@@ -132,7 +133,7 @@ router.get("/detail", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   const { bannerId } = req.query;
 
   if (!bannerId) {
@@ -162,7 +163,7 @@ router.delete("/", async (req, res) => {
   }
 });
 
-router.put("/", async (req, res) => {
+router.put("/", auth, async (req, res) => {
   const { bannerId } = req.query;
   if (!bannerId) {
     return res.status(400).json({ msg: "Banner ID is required" });

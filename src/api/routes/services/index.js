@@ -1,8 +1,9 @@
 import express from "express";
 import pool from "../../../db/index.js";
+import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const {
       servicesImage,
@@ -118,7 +119,7 @@ router.get("/detail", async (req, res) => {
   }
 });
 
-router.put("/", async (req, res) => {
+router.put("/", auth, async (req, res) => {
   const { serviceId } = req.query;
   const {
     servicesImage,
@@ -172,7 +173,7 @@ router.put("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/",auth, async (req, res) => {
   const { serviceId } = req.query;
 
   try {

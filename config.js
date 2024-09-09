@@ -9,6 +9,7 @@ const {
   DB_PORT,
   EMAIL,
   PASSWORD,
+  JWT_SECRET,
 } = process.env;
 
 export default {
@@ -20,4 +21,5 @@ export default {
   DB_PORT,
   EMAIL,
   PASSWORD,
+  JWT_SECRET,
 };

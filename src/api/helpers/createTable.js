@@ -134,6 +134,16 @@ CREATE TABLE IF NOT EXISTS abouts (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 `;
+const createAuthTable = `
+CREATE TABLE IF NOT EXISTS auth (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
 
 export const createTables = async () => {
   try {
@@ -149,6 +159,7 @@ export const createTables = async () => {
     await connection.query(createFacilityDetailTable);
     await connection.query(createTheTeamTable);
     await connection.query(createAboutTable);
+    await connection.query(createAuthTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

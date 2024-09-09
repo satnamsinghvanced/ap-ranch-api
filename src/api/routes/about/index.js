@@ -1,8 +1,9 @@
 import express from "express";
 import pool from "../../../db/index.js";
+import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const { image, name, descriptions } = req.body;
     const connection = await pool.getConnection();
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.put("/", async (req, res) => {
+router.put("/", auth, async (req, res) => {
   const { id } = req.query;
   const { image, name, descriptions } = req.body;
 
@@ -65,7 +66,7 @@ router.put("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   const { id } = req.query;
 
   try {
