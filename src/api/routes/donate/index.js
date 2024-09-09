@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 import config from "../../../../config.js";
 
 const router = express.Router();
-const { SQUARE_ACCESS_TOKEN } = config;
+const { SQUARE_ACCESS_TOKEN, LOCATION_ID } = config;
 const { paymentsApi } = new Client({
   accessToken: SQUARE_ACCESS_TOKEN,
   environment: "sandbox",
@@ -22,6 +22,7 @@ router.post("/", async (req, res) => {
         currency: "USD",
         amount: amount,
       },
+      location_id: LOCATION_ID,
       buyerEmailAddress: email,
       billingAddress: {
         locality: state,

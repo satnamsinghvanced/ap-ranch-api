@@ -11,6 +11,7 @@ const {
   PASSWORD,
   JWT_SECRET,
   SQUARE_ACCESS_TOKEN,
+  LOCATION_ID,
 } = process.env;
 
 export default {
@@ -24,4 +25,5 @@ export default {
   PASSWORD,
   JWT_SECRET,
   SQUARE_ACCESS_TOKEN,
+  LOCATION_ID,
 };
