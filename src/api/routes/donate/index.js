@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
         address: {
           first_name: firstName,
           last_name: lastName,
-          locality: state,
+          administrative_district_level_1: state,
           postalCode: postalCode,
           country,
         },
@@ -77,7 +77,7 @@ router.post("/", async (req, res) => {
       buyerEmailAddress: email,
       customer_id: customerId,
       billingAddress: {
-        locality: state,
+        administrative_district_level_1: state,
         firstName,
         lastName,
       },
