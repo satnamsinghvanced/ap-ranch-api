@@ -39,12 +39,13 @@ router.post("/", async (req, res) => {
       customerId = existingCustomer[0].customerId;
     } else {
       const { result } = await customersApi.createCustomer({
-        givenName: `${firstName} ${lastName}`,
+        givenName: firstName,
+        familyName: lastName,
         emailAddress: email,
         address: {
           first_name: firstName,
           last_name: lastName,
-          administrative_district_level_1: state,
+          administrativeDistrictLevel1: state,
           postalCode: postalCode,
           country,
         },
@@ -77,7 +78,7 @@ router.post("/", async (req, res) => {
       buyerEmailAddress: email,
       customerId,
       billingAddress: {
-        administrative_district_level_1: state,
+        administrativeDistrictLevel1: state,
         firstName,
         lastName,
       },
