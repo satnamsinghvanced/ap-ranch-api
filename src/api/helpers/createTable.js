@@ -156,8 +156,26 @@ CREATE TABLE IF NOT EXISTS payments (
   state VARCHAR(100),
   amount DECIMAL(10, 2) NOT NULL,
   status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+`;
+
+const createCustomerTable = `
+CREATE TABLE IF NOT EXISTS customer (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ firstName VARCHAR(255) NOT NULL,
+ lastName VARCHAR(255) NOT NULL,
+ state VARCHAR(100) NOT NULL,
+ postalCode VARCHAR(20) NOT NULL,
+ country VARCHAR(10) DEFAULT 'US',
+ givenName VARCHAR(255) AS (CONCAT(firstName, ' ', lastName)) STORED,
+ email VARCHAR(255) NOT NULL,
+ phone VARCHAR(20) NOT NULL,
+ customerId VARCHAR(255) NOT NULL,
+ createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
 `;
 
 export const createTables = async () => {
@@ -176,6 +194,7 @@ export const createTables = async () => {
     await connection.query(createAboutTable);
     await connection.query(createAuthTable);
     await connection.query(createPaymentTable);
+    await connection.query(createCustomerTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {
