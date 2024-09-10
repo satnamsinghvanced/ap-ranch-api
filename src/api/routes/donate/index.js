@@ -73,9 +73,9 @@ router.post("/", async (req, res) => {
         currency: "USD",
         amount: Math.round(amount * 100),
       },
-      location_id: LOCATION_ID,
+      locationId: LOCATION_ID,
       buyerEmailAddress: email,
-      customer_id: customerId,
+      customerId,
       billingAddress: {
         administrative_district_level_1: state,
         firstName,
