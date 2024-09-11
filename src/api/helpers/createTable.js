@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS payments (
 `;
 
 const createCustomerTable = `
-CREATE TABLE IF NOT EXISTS customer (
+CREATE TABLE IF NOT EXISTS customers (
  id INT AUTO_INCREMENT PRIMARY KEY,
  firstName VARCHAR(255) NOT NULL,
  lastName VARCHAR(255) NOT NULL,
@@ -176,6 +176,35 @@ CREATE TABLE IF NOT EXISTS customer (
  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
+`;
+
+const createIndemnityAgreementTable = `
+CREATE TABLE IF NOT EXISTS indemnityAgreements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    activity VARCHAR(255) NOT NULL,
+    courseNumber VARCHAR(50) NOT NULL,
+    instructor VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    semester VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    dateSigned DATE NOT NULL,
+    sign VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
+const createParentsAgreementTable = `
+CREATE TABLE IF NOT EXISTS parentsAgreements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    ageDivision VARCHAR(255) NOT NULL,
+    dateSigned DATE NOT NULL,
+    sign VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 `;
 
 export const createTables = async () => {
@@ -195,6 +224,8 @@ export const createTables = async () => {
     await connection.query(createAuthTable);
     await connection.query(createPaymentTable);
     await connection.query(createCustomerTable);
+    await connection.query(createIndemnityAgreementTable);
+    await connection.query(createParentsAgreementTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

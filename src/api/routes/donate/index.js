@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
     await connection.beginTransaction();
 
     const [existingCustomer] = await connection.query(
-      "SELECT * FROM customer WHERE email = ?",
+      "SELECT * FROM customers WHERE email = ?",
       [email]
     );
 
@@ -53,7 +53,7 @@ router.post("/", async (req, res) => {
       });
       customerId = result.customer.id;
       await connection.query(
-        `INSERT INTO customer (customerId,firstName, lastName, phone,email,state,country,postalCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO customers (customerId,firstName, lastName, phone,email,state,country,postalCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           customerId,
           firstName,
