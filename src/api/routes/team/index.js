@@ -38,7 +38,9 @@ router.post("/", auth, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [teamMembers] = await connection.query("SELECT * FROM teams");
+    const [teamMembers] = await connection.query(
+      "SELECT * FROM teams ORDER BY sortIndex ASC"
+    );
     connection.release();
     res.status(200).json(teamMembers);
   } catch (err) {
