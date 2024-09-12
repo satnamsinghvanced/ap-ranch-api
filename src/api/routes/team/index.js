@@ -5,12 +5,26 @@ const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
   try {
-    const { image, name, descriptions, role } = req.body;
+    const { image, name, descriptions, role, sortIndex } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+    const [existingEntries] = await connection.query(
+      `SELECT * FROM teams WHERE sortIndex  >= ? ORDER BY sortIndex  ASC`,
+      [sortIndex]
+    );
+    if (existingEntries.length > 0) {
+      // Increment the index of all entries with this index or higher
+      for (let i = 0; i < existingEntries.length; i++) {
+        const newIndex = existingEntries[i].sortIndex + 1;
+        await connection.query(`UPDATE teams SET sortIndex  = ? WHERE id = ?`, [
+          newIndex,
+          existingEntries[i].id,
+        ]);
+      }
+    }
     const [team] = await connection.query(
-      `INSERT INTO teams (image, name, descriptions,role) VALUES (?, ?, ?, ?)`,
-      [image, name, descriptions, role]
+      `INSERT INTO teams (image, name, descriptions,role,sortIndex) VALUES (?, ?, ?, ?, ?)`,
+      [image, name, descriptions, role, sortIndex]
     );
     await connection.commit();
     connection.release();
@@ -84,29 +98,119 @@ router.put("/", auth, async (req, res) => {
     console.log(err);
   }
 });
-router.delete("/", auth, async (req, res) => {
-  const { id } = req.query;
 
+router.put("/update-index", auth, async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    const { id } = req.query;
+    const { currentIndex, newIndex } = req.body;
+
+    if (currentIndex === undefined || newIndex === undefined || !id) {
+      return res.status(400).json({ msg: "Invalid input" });
+    }
+
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [result] = await connection.query("DELETE FROM teams WHERE id = ?", [
+    if (currentIndex < newIndex) {
+      // Shift entries between currentIndex and newIndex up by 1
+      await connection.query(
+        `UPDATE teams SET sortIndex = sortIndex - 1 WHERE sortIndex > ? AND sortIndex <= ?`,
+        [currentIndex, newIndex]
+      );
+    } else if (currentIndex > newIndex) {
+      // Shift entries between newIndex and currentIndex down by 1
+      await connection.query(
+        `UPDATE teams SET sortIndex = sortIndex + 1 WHERE sortIndex >= ? AND sortIndex < ?`,
+        [newIndex, currentIndex]
+      );
+    }
+
+    // Update the index of the specific entry
+    await connection.query(`UPDATE teams SET sortIndex = ? WHERE id = ?`, [
+      newIndex,
       id,
     ]);
 
-    if (result.affectedRows === 0) {
+    await connection.commit();
+    res.status(200).json({ message: "Index updated successfully" });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ msg: "Server error" });
+    console.log(err);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// router.delete("/", auth, async (req, res) => {
+//   const { id } = req.query;
+
+//   try {
+//     const connection = await pool.getConnection();
+//     await connection.beginTransaction();
+
+//     const [result] = await connection.query("DELETE FROM teams WHERE id = ?", [
+//       id,
+//     ]);
+
+//     if (result.affectedRows === 0) {
+//       return res.status(404).json({ msg: "Team member not found" });
+//     }
+
+//     await connection.commit();
+//     connection.release();
+
+//     res.status(200).json({ message: "Team member deleted successfully" });
+//   } catch (err) {
+//     if (connection) await connection.rollback();
+//     res.status(500).json({ msg: "Server error" });
+//     console.log(err);
+//   }
+// });
+router.delete("/", auth, async (req, res) => {
+  const { id } = req.query;
+
+  let connection;
+  try {
+    if (!id) {
+      return res.status(400).json({ msg: "Invalid request, id is required" });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // Get the current index of the team member to be deleted
+    const [result] = await connection.query(
+      "SELECT sortIndex FROM teams WHERE id = ?",
+      [id]
+    );
+
+    if (result.length === 0) {
+      await connection.rollback();
       return res.status(404).json({ msg: "Team member not found" });
     }
 
-    await connection.commit();
-    connection.release();
+    const { sortIndex } = result[0];
 
+    // Delete the team member
+    await connection.query("DELETE FROM teams WHERE id = ?", [id]);
+
+    // Update the sortIndex of remaining team members
+    await connection.query(
+      "UPDATE teams SET sortIndex = sortIndex - 1 WHERE sortIndex > ?",
+      [sortIndex]
+    );
+
+    await connection.commit();
     res.status(200).json({ message: "Team member deleted successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
+
 export default router;
