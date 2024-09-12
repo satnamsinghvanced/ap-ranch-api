@@ -207,6 +207,18 @@ CREATE TABLE IF NOT EXISTS parentsAgreements (
 );
 `;
 
+const createCollaborateTable = `
+CREATE TABLE IF NOT EXISTS collaborates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    descriptions TEXT,
+    headerImage VARCHAR(255),
+    image VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -226,6 +238,7 @@ export const createTables = async () => {
     await connection.query(createCustomerTable);
     await connection.query(createIndemnityAgreementTable);
     await connection.query(createParentsAgreementTable);
+    await connection.query(createCollaborateTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {
