@@ -152,7 +152,7 @@ router.delete("/", auth, async (req, res) => {
     await connection.query("DELETE FROM banners WHERE id = ?", [bannerId]);
 
     // Delete donate record
-    await connection.query("DELETE FROM donates WHERE id = ?", [bannerId]);
+    await connection.query("DELETE FROM donates WHERE bannerId = ?", [bannerId]);
     await connection.commit();
     connection.release();
 

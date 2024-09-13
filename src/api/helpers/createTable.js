@@ -86,6 +86,15 @@ CREATE TABLE IF NOT EXISTS contactForms (
 );
 `;
 
+const createContactDetailForm = `
+CREATE TABLE IF NOT EXISTS contactDetailForms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
 // Create facility table
 const createFacilityTable = `
 CREATE TABLE IF NOT EXISTS facilities (
@@ -220,6 +229,27 @@ CREATE TABLE IF NOT EXISTS collaborates (
 );
 `;
 
+const createFormTable = `
+CREATE TABLE IF NOT EXISTS forms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    description TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
+const createFormButtonTable = `
+CREATE TABLE IF NOT EXISTS formsButtons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    buttonTxt VARCHAR(255) NOT NULL,
+    link TEXT,
+    formId INT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (formId) REFERENCES forms(id) ON DELETE CASCADE
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -240,6 +270,9 @@ export const createTables = async () => {
     await connection.query(createIndemnityAgreementTable);
     await connection.query(createParentsAgreementTable);
     await connection.query(createCollaborateTable);
+    await connection.query(createContactDetailForm);
+    await connection.query(createFormTable);
+    await connection.query(createFormButtonTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {
