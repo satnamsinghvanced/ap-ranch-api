@@ -250,6 +250,16 @@ CREATE TABLE IF NOT EXISTS formsButtons (
 );
 `;
 
+const createMissionTable = `
+CREATE TABLE IF NOT EXISTS missions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -273,6 +283,7 @@ export const createTables = async () => {
     await connection.query(createContactDetailForm);
     await connection.query(createFormTable);
     await connection.query(createFormButtonTable);
+    await connection.query(createMissionTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {
