@@ -23,6 +23,47 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/user-detail", auth, async (req, res) => {
+  let connection;
+  try {
+    const connection = await pool.getConnection();
+    const [mission] = await connection.query("SELECT * FROM contactForms");
+    res.status(200).json(mission);
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ msg: "Server error" });
+    console.log(err);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+router.delete("/user-detail", auth, async (req, res) => {
+  let connection;
+  try {
+    const { id } = req.query;
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const [result] = await connection.query(
+      `DELETE FROM contactForms WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ msg: "Mission not found." });
+    }
+    await connection.commit();
+    res.status(200).json({ message: "Contact deleted successfully." });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ msg: "Server error" });
+    console.log(err);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 router.post("/detail", auth, async (req, res) => {
   try {
     const { description } = req.body;
@@ -81,7 +122,7 @@ router.put("/", auth, async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   try {
     const { id } = req.query;
     const connection = await pool.getConnection();
