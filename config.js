@@ -12,6 +12,7 @@ const {
   JWT_SECRET,
   SQUARE_ACCESS_TOKEN,
   LOCATION_ID,
+  CLIENT_EMAIL,
 } = process.env;
 
 export default {
@@ -26,4 +27,5 @@ export default {
   JWT_SECRET,
   SQUARE_ACCESS_TOKEN,
   LOCATION_ID,
+  CLIENT_EMAIL,
 };
