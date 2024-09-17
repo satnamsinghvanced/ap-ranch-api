@@ -66,12 +66,12 @@ router.delete("/user-detail", auth, async (req, res) => {
 
 router.post("/detail", auth, async (req, res) => {
   try {
-    const { description } = req.body;
+    const { description, contact, image } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
-      `INSERT INTO contactDetailForms (description) VALUES (?)`,
-      [description]
+      `INSERT INTO contactDetailForms (description,contact,image) VALUES (?, ?, ?)`,
+      [description, contact, image]
     );
     await connection.commit();
     connection.release();
@@ -97,28 +97,31 @@ router.get("/", async (req, res) => {
 });
 
 router.put("/", auth, async (req, res) => {
+  let connection;
   try {
-    const { id } = req.query;
-    const { description } = req.body;
-    const connection = await pool.getConnection();
-    await connection.beginTransaction();
+    const { id } = req.query; 
+    const { description, contact, image } = req.body; 
+    connection = await pool.getConnection(); 
+    await connection.beginTransaction(); 
+
     const [result] = await connection.query(
-      `UPDATE contactDetailForms SET description = ? WHERE id = ?`,
-      [description, id]
+      `UPDATE contactDetailForms SET description = ?, contact = ?, image = ? WHERE id = ?`,
+      [description, contact, image, id]
     );
 
     if (result.affectedRows === 0) {
+      await connection.rollback();
       return res.status(404).json({ msg: "Contact not found" });
     }
 
-    await connection.commit();
-    connection.release();
-
-    res.status(200).json({ message: "About updated successfully" });
+    await connection.commit(); 
+    res.status(200).json({ message: "Contact updated successfully" });
   } catch (err) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.rollback(); 
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+    console.error(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
 

@@ -90,6 +90,8 @@ const createContactDetailForm = `
 CREATE TABLE IF NOT EXISTS contactDetailForms (
   id INT AUTO_INCREMENT PRIMARY KEY,
   description TEXT,
+  contact TEXT,
+  image VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
