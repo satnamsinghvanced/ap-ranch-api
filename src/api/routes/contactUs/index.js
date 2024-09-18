@@ -99,10 +99,10 @@ router.get("/", async (req, res) => {
 router.put("/", auth, async (req, res) => {
   let connection;
   try {
-    const { id } = req.query; 
-    const { description, contact, image } = req.body; 
-    connection = await pool.getConnection(); 
-    await connection.beginTransaction(); 
+    const { id } = req.query;
+    const { description, contact, image } = req.body;
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
     const [result] = await connection.query(
       `UPDATE contactDetailForms SET description = ?, contact = ?, image = ? WHERE id = ?`,
@@ -114,10 +114,10 @@ router.put("/", auth, async (req, res) => {
       return res.status(404).json({ msg: "Contact not found" });
     }
 
-    await connection.commit(); 
+    await connection.commit();
     res.status(200).json({ message: "Contact updated successfully" });
   } catch (err) {
-    if (connection) await connection.rollback(); 
+    if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.error(err);
   } finally {

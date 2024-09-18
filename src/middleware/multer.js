@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
     //const filename = file.fieldname + '-' + uniqueSuffix;
-    const filename = file.fieldname + '-' + uniqueSuffix + extension;
+    const filename = file.fieldname + "-" + uniqueSuffix + extension;
     cb(null, filename);
     //cb(null, file.originalname); // Keep original filename
   },
@@ -21,7 +21,41 @@ const storage = multer.diskStorage({
 
 // File filter to accept only images
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "video/mp4",
+    "video/x-flv",
+    "video/mp2t",
+    "video/3gpp",
+    "video/3gpp2",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-ms-wmv",
+    "video/webm",
+    "video/mpeg",
+    "video/ogg",
+    "video/x-m4v",
+    "video/x-ms-asf",
+    "video/x-ms-wvx",
+    "video/x-ms-wmx",
+    "video/x-matroska",
+    "video/x-fli",
+    "video/x-f4v",
+    "video/vnd.vivo",
+    "video/vnd.ms-playready.media.pyv",
+    "video/vnd.mpegurl",
+    "video/vnd.fvt",
+    "video/mj2",
+    "video/jpm",
+    "video/jpeg",
+    "video/h261",
+    "video/h263",
+    "video/h264",
+    "video/avi",
+  ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -33,7 +67,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 10, // 10MB file size limit
+    fileSize: 1024 * 1024 * 30, // 10MB file size limit
   },
   fileFilter: fileFilter,
   onError: function (err, next) {
