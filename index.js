@@ -28,6 +28,7 @@ app.use("/api", routes);
 
 app.use("/public", express.static("./public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/pdf", express.static(path.join(__dirname, "pdf")));
 pool
   .query("SELECT 1")
   .then(() => {
