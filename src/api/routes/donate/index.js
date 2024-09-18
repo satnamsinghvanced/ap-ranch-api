@@ -5,10 +5,10 @@ import { randomUUID } from "crypto";
 import config from "../../../../config.js";
 
 const router = express.Router();
-const { SQUARE_ACCESS_TOKEN, LOCATION_ID } = config;
+const { SQUARE_ACCESS_TOKEN, LOCATION_ID, SQUARE_ENV } = config;
 const { paymentsApi, customersApi } = new Client({
   accessToken: SQUARE_ACCESS_TOKEN,
-  environment: "sandbox",
+  environment: SQUARE_ENV,
 });
 
 router.post("/", async (req, res) => {

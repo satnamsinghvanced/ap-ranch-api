@@ -13,6 +13,7 @@ const {
   SQUARE_ACCESS_TOKEN,
   LOCATION_ID,
   CLIENT_EMAIL,
+  SQUARE_ENV,
 } = process.env;
 
 export default {
@@ -28,4 +29,5 @@ export default {
   SQUARE_ACCESS_TOKEN,
   LOCATION_ID,
   CLIENT_EMAIL,
+  SQUARE_ENV,
 };
