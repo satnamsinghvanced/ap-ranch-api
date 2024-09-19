@@ -262,6 +262,46 @@ CREATE TABLE IF NOT EXISTS missions (
 );
 `;
 
+const createHeaderTable = `
+CREATE TABLE IF NOT EXISTS headers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    headerLogo VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
+const createFooterTable = `
+CREATE TABLE IF NOT EXISTS footers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    footerLogo VARCHAR(255),
+    footerTxt TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
+const createMediaLinkTable = `
+CREATE TABLE IF NOT EXISTS mediaLinks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    logo VARCHAR(255),
+    footerId INT,
+    link TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (footerId) REFERENCES footers(id) ON DELETE CASCADE
+    );
+`;
+
+const createDonateTabTable = `
+CREATE TABLE IF NOT EXISTS donateTabs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    logo VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
+
 export const createTables = async () => {
   try {
     const connection = await pool.getConnection();
@@ -286,6 +326,10 @@ export const createTables = async () => {
     await connection.query(createFormTable);
     await connection.query(createFormButtonTable);
     await connection.query(createMissionTable);
+    await connection.query(createHeaderTable);
+    await connection.query(createFooterTable);
+    await connection.query(createMediaLinkTable);
+    await connection.query(createDonateTabTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

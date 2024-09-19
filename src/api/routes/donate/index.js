@@ -82,6 +82,7 @@ router.post("/", async (req, res) => {
         firstName,
         lastName,
       },
+      note: "Website Donation",
     });
     const payment = paymentResult.payment;
     if (payment.status === "COMPLETED") {

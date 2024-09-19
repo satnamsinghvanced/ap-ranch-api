@@ -55,7 +55,6 @@ const fileFilter = (req, file, cb) => {
     "video/h263",
     "video/h264",
     "video/avi",
-    "application/pdf",
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
