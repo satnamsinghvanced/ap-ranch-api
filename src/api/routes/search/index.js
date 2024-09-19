@@ -11,30 +11,36 @@ router.post("/", async (req, res) => {
 
     const wildcardSearchTerm = `%${searchTerm}%`;
 
-    const teamQuery = `
-        SELECT 'teams' AS source, id, name, role, descriptions, image, sortIndex, created_at 
-        FROM teams 
-        WHERE name LIKE ? 
-        OR role LIKE ? 
-        OR descriptions LIKE ? 
-        ORDER BY sortIndex`;
+    const [tables] = await connection.query("SHOW TABLES");
 
-    const bannerQuery = `
-        SELECT 'banners' AS source, id, bannerImage, logoImage, descriptions, created_at,page_name 
-        FROM banners 
-        WHERE descriptions LIKE ?`;
+    let results = [];
 
-    const [teamResults, bannerResults] = await Promise.all([
-      connection.query(teamQuery, [
-        wildcardSearchTerm,
-        wildcardSearchTerm,
-        wildcardSearchTerm,
-      ]),
-      connection.query(bannerQuery, [wildcardSearchTerm]),
-    ]);
+    for (let table of tables) {
+      const tableName = Object.values(table)[0];
 
-    const results = [...teamResults[0], ...bannerResults[0]];
+      const [columns] = await connection.query(
+        `SHOW COLUMNS FROM \`${tableName}\``
+      );
 
+      for (let column of columns) {
+        const columnName = column.Field;
+
+        const [rows] = await connection.query(
+          `SELECT * FROM \`${tableName}\` WHERE \`${columnName}\` LIKE ? LIMIT 1`,
+          [wildcardSearchTerm]
+        );
+
+        if (rows.length > 0 && rows[0].hasOwnProperty("page_name")) {
+          results.push({
+            tableName: tableName,
+            id: rows[0]["id"],
+            page_name: rows[0]["page_name"],
+            content: rows[0][columnName],
+          });
+          break;
+        }
+      }
+    }
     if (results.length > 0) {
       res.status(200).json({ success: true, data: results });
     } else {
