@@ -18,6 +18,7 @@ import header from "./header/index.js";
 import donateTab from "./donateTab/index.js";
 import footer from "./footer/index.js";
 import search from "./search/index.js";
+import media from "./media/index.js"
 const router = express.Router();
 router.use("/home", home);
 router.use("/contact", contact);
@@ -38,4 +39,5 @@ router.use("/header", header);
 router.use("/donateTab", donateTab);
 router.use("/footer", footer);
 router.use("/search", search);
+router.use("/media", media);
 export default router;
