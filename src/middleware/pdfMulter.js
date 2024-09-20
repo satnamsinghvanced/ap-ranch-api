@@ -33,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 const pdfUpload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 30, // 30MB file size limit
+    fileSize: 1024 * 1024 * 5, // 5MB file size limit
   },
   fileFilter: fileFilter,
   onError: function (err, next) {

@@ -1,6 +1,5 @@
 import express from "express";
 import pool from "../../../db/index.js";
-import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
