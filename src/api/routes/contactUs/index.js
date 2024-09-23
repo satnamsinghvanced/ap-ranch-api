@@ -2,6 +2,7 @@ import express from "express";
 import pool from "../../../db/index.js";
 import sendContactEmail from "../../helpers/sendEmail.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -103,6 +104,18 @@ router.put("/", auth, async (req, res) => {
     const { description, contact, image } = req.body;
     connection = await pool.getConnection();
     await connection.beginTransaction();
+    const [contactDetail] = await connection.query(
+      "SELECT * FROM contactDetailForms WHERE id = ?",
+      [id]
+    );
+
+    if (contactDetail.length === 0) {
+      return res.status(200).json({ msg: "Contact not found" });
+    }
+    const filePath = contactDetail[0].image;
+    if (filePath && filePath !== image) {
+      await deleteFile(filePath);
+    }
 
     const [result] = await connection.query(
       `UPDATE contactDetailForms SET description = ?, contact = ?, image = ? WHERE id = ?`,
@@ -130,6 +143,19 @@ router.delete("/", auth, async (req, res) => {
     const { id } = req.query;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [contactDetail] = await connection.query(
+      "SELECT * FROM contactDetailForms WHERE id = ?",
+      [id]
+    );
+
+    if (contactDetail.length === 0) {
+      return res.status(200).json({ msg: "Contact not found" });
+    }
+    const filePath = contactDetail[0].image;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
     const [result] = await connection.query(
       "DELETE FROM contactDetailForms WHERE id = ?",
       [id]

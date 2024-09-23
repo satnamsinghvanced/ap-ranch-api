@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -46,6 +47,19 @@ router.put("/", auth, async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [about] = await connection.query(
+      "SELECT * FROM abouts WHERE id = ?",
+      [id]
+    );
+
+    if (about.length === 0) {
+      return res.status(200).json({ msg: "About not found" });
+    }
+    const filePath = about[0].image;
+    if (filePath && filePath !== image) {
+      await deleteFile(filePath);
+    }
+
     const [result] = await connection.query(
       `UPDATE abouts SET image = ?, name = ?, descriptions = ? WHERE id = ?`,
       [image, name, descriptions, id]
@@ -72,6 +86,19 @@ router.delete("/", auth, async (req, res) => {
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [about] = await connection.query(
+      "SELECT * FROM abouts WHERE id = ?",
+      [id]
+    );
+
+    if (about.length === 0) {
+      return res.status(200).json({ msg: "About not found" });
+    }
+    const filePath = about[0].image;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
 
     const [result] = await connection.query("DELETE FROM abouts WHERE id = ?", [
       id,

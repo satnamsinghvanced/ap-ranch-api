@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -133,6 +134,33 @@ router.put("/", auth, async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [service] = await connection.query(
+      "SELECT * FROM services WHERE id = ?",
+      [serviceId]
+    );
+
+    if (service.length === 0) {
+      connection.release();
+      return res.status(200).json({ msg: "Service not found" });
+    }
+
+    const filePath = service[0].servicesImage;
+    if (filePath && filePath !== servicesImage) {
+      await deleteFile(filePath);
+    }
+
+    // Fetch related images and provided services for the specific service
+    const [serviceImages] = await connection.query(
+      "SELECT * FROM serviceImages WHERE serviceId = ?",
+      [serviceId]
+    );
+
+    for (const serviceImage of serviceImages) {
+      if (!images.includes(serviceImage.image)) {
+        await deleteFile(serviceImage.image);
+      }
+    }
+
     // Update the main service details
     await connection.query(
       `UPDATE services SET servicesImage = ?, servicesName = ?, serviceDescriptions = ? WHERE id = ?`,
@@ -173,12 +201,37 @@ router.put("/", auth, async (req, res) => {
   }
 });
 
-router.delete("/",auth, async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   const { serviceId } = req.query;
 
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [service] = await connection.query(
+      "SELECT * FROM services WHERE id = ?",
+      [serviceId]
+    );
+
+    if (service.length === 0) {
+      connection.release();
+      return res.status(200).json({ msg: "Service not found" });
+    }
+
+    const filePath = service[0].servicesImage;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
+
+    // Fetch related images and provided services for the specific service
+    const [serviceImages] = await connection.query(
+      "SELECT * FROM serviceImages WHERE serviceId = ?",
+      [serviceId]
+    );
+
+    for (const serviceImage of serviceImages) {
+      await deleteFile(serviceImage.image);
+    }
 
     // Delete associated images
     await connection.query(`DELETE FROM serviceImages WHERE serviceId = ?`, [

@@ -2,6 +2,7 @@ import express from "express";
 import upload from "../../../middleware/multer.js";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -143,6 +144,43 @@ router.delete("/", auth, async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [bannerData] = await connection.query(
+      "SELECT * FROM banners WHERE id = ?",
+      [bannerId]
+    );
+    if (bannerData.length === 0) {
+      return res.status(200).json({ msg: "Banners Details not found" });
+    }
+
+    const filePath = bannerData[0].bannerImage;
+    const logoPath = bannerData[0].logoImage;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
+    if (logoPath) {
+      await deleteFile(logoPath);
+    }
+
+    const [partnerLogoRows] = await connection.query(
+      "SELECT * FROM partnerLogos WHERE bannerId = ?",
+      [bannerId]
+    );
+
+    for (const logo of partnerLogoRows) {
+      const filePath = logo.logo;
+      await deleteFile(filePath);
+    }
+
+    const [donateRows] = await connection.query(
+      "SELECT * FROM donates WHERE bannerId = ?",
+      [bannerId]
+    );
+    const donateLogoPath = donateRows[0].image;
+
+    if (donateLogoPath) {
+      await deleteFile(donateLogoPath);
+    }
+
     // Delete associated partner logos
     await connection.query("DELETE FROM partnerLogos WHERE bannerId = ?", [
       bannerId,
@@ -152,7 +190,9 @@ router.delete("/", auth, async (req, res) => {
     await connection.query("DELETE FROM banners WHERE id = ?", [bannerId]);
 
     // Delete donate record
-    await connection.query("DELETE FROM donates WHERE bannerId = ?", [bannerId]);
+    await connection.query("DELETE FROM donates WHERE bannerId = ?", [
+      bannerId,
+    ]);
     await connection.commit();
     connection.release();
 
@@ -173,7 +213,48 @@ router.put("/", auth, async (req, res) => {
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
-    // Update banner table
+
+    const [bannerData] = await connection.query(
+      "SELECT * FROM banners WHERE id = ?",
+      [bannerId]
+    );
+    if (bannerData.length === 0) {
+      return res.status(200).json({ msg: "Banners Details not found" });
+    }
+
+    const filePath = bannerData[0].bannerImage;
+    const logoPath = bannerData[0].logoImage;
+    if (filePath && filePath !== banner.bannerImage) {
+      await deleteFile(filePath);
+    }
+    if (logoPath && logoPath !== banner.logoImage) {
+      await deleteFile(logoPath);
+    }
+
+    const [partnerLogoRows] = await connection.query(
+      "SELECT * FROM partnerLogos WHERE bannerId = ?",
+      [bannerId]
+    );
+
+    const logoArray = partnerLogo.map((x) => x.logo);
+
+    for (const logo of partnerLogoRows) {
+      const filePath = logo.logo;
+      if (!logoArray.includes(filePath)) {
+        await deleteFile(filePath);
+      }
+    }
+
+    const [donateRows] = await connection.query(
+      "SELECT * FROM donates WHERE bannerId = ?",
+      [bannerId]
+    );
+    const donateLogoPath = donateRows[0].image;
+
+    if (donateLogoPath && donateLogoPath !== donate.image) {
+      await deleteFile(donateLogoPath);
+    }
+
     await connection.query(
       `UPDATE banners SET bannerImage = ?, logoImage = ?, descriptions = ? WHERE id = ?`,
       [banner.bannerImage, banner.logoImage, banner.descriptions, bannerId]

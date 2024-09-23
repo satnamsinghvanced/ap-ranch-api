@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -67,6 +68,33 @@ router.put("/", auth, async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [footers] = await connection.query(
+      `SELECT * FROM footers WHERE id = ?`,
+      [id]
+    );
+    if (footers.length === 0) {
+      return res.status(200).json({ msg: "Facility Details not found" });
+    }
+
+    const filePath = footers[0].footerLogo;
+    if (filePath && filePath !== footerLogo) {
+      await deleteFile(filePath);
+    }
+
+    const [mediaLinks] = await connection.query(
+      `SELECT * FROM mediaLinks WHERE footerId = ?`,
+      [id]
+    );
+
+    const imageArray = links.map((x) => x.logo);
+
+    for (const media of mediaLinks) {
+      const filePath = media.logo;
+      if (!imageArray.includes(filePath)) {
+        await deleteFile(filePath);
+      }
+    }
+
     // Update footer details
     await connection.query(
       `UPDATE footers SET footerLogo = ?, footerTxt = ? WHERE id = ?`,
@@ -104,6 +132,29 @@ router.delete("/", auth, async (req, res) => {
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [footers] = await connection.query(
+      `SELECT * FROM footers WHERE id = ?`,
+      [id]
+    );
+    if (footers.length === 0) {
+      return res.status(200).json({ msg: "Facility Details not found" });
+    }
+
+    const filePath = footers[0].footerLogo;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
+
+    const [mediaLinks] = await connection.query(
+      `SELECT * FROM mediaLinks WHERE footerId = ?`,
+      [id]
+    );
+
+    for (const media of mediaLinks) {
+      const filePath = media.logo;
+      await deleteFile(filePath);
+    }
 
     // Delete media links first (since they depend on the footer)
     await connection.query(`DELETE FROM mediaLinks WHERE footerId = ?`, [id]);

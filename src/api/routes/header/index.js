@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -47,6 +48,19 @@ router.put("/", auth, async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [header] = await connection.query(
+      "SELECT * FROM headers WHERE id = ?",
+      [id]
+    );
+
+    if (header.length === 0) {
+      return res.status(200).json({ msg: "Header not found" });
+    }
+    const filePath = header[0].headerLogo;
+    if (filePath && filePath !== headerLogo) {
+      await deleteFile(filePath);
+    }
+
     const [result] = await connection.query(
       `UPDATE headers SET headerLogo = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
       [headerLogo, id]
@@ -74,6 +88,19 @@ router.delete("/", auth, async (req, res) => {
     const { id } = req.query;
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [header] = await connection.query(
+      "SELECT * FROM headers WHERE id = ?",
+      [id]
+    );
+
+    if (header.length === 0) {
+      return res.status(200).json({ msg: "Header not found" });
+    }
+    const filePath = header[0].headerLogo;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
 
     const [result] = await connection.query(
       `DELETE FROM headers WHERE id = ?`,

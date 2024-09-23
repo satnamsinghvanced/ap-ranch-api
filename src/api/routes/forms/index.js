@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 
 const router = express.Router();
 
@@ -68,6 +69,20 @@ router.put("/", auth, async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [formButton] = await connection.query(
+      "SELECT * FROM formsButtons WHERE formId = ?",
+      [id]
+    );
+
+    const linkArray = tabs.map((x) => x.link);
+
+    for (const tab of formButton) {
+      const filePath = tab.link;
+      if (!linkArray.includes(filePath)) {
+        await deleteFile(filePath);
+      }
+    }
+
     // Update form description
     await connection.query(`UPDATE forms SET description = ? WHERE id = ?`, [
       description,
@@ -115,6 +130,17 @@ router.delete("/", auth, async (req, res) => {
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
+    const [formButton] = await connection.query(
+      "SELECT * FROM formsButtons WHERE formId = ?",
+      [id]
+    );
+
+    for (const tab of formButton) {
+      const filePath = tab.link;
+      if (filePath) {
+        await deleteFile(filePath);
+      }
+    }
 
     // Delete the form (buttons will be deleted due to the foreign key constraint)
     await connection.query(`DELETE FROM forms WHERE id = ?`, [id]);

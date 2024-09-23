@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../../../db/index.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
@@ -60,6 +61,21 @@ router.put("/", auth, async (req, res) => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [collaborate] = await connection.query(
+      "SELECT * FROM collaborates WHERE id = ?",
+      [id]
+    );
+    if (collaborate.length === 0) {
+      return res.status(200).json({ msg: "Collaborate not found" });
+    }
+    const filePath = collaborate[0].image;
+    const headerFile = collaborate[0].headerImage;
+    if (filePath && filePath !== image) {
+      await deleteFile(filePath);
+    }
+    if (headerFile && headerFile !== headerImage) {
+      await deleteFile(headerFile);
+    }
     const [result] = await connection.query(
       `UPDATE collaborates 
          SET name = ?, descriptions = ?, headerImage = ?, image = ? 
@@ -86,6 +102,22 @@ router.delete("/", auth, async (req, res) => {
     const { id } = req.query;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [collaborate] = await connection.query(
+      "SELECT * FROM collaborates WHERE id = ?",
+      [id]
+    );
+    if (collaborate.length === 0) {
+      return res.status(200).json({ msg: "Collaborate not found" });
+    }
+    const filePath = collaborate[0].image;
+    const headerFile = collaborate[0].headerImage;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
+    if (headerFile) {
+      await deleteFile(headerFile);
+    }
 
     const [result] = await connection.query(
       `DELETE FROM collaborates WHERE id = ?`,

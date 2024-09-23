@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
@@ -80,6 +81,20 @@ router.put("/", auth, async (req, res) => {
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [teamMember] = await connection.query(
+      "SELECT * FROM teams WHERE id = ?",
+      [id]
+    );
+
+    if (teamMember.length === 0) {
+      return res.status(200).json({ msg: "Team member not found" });
+    }
+
+    const filePath = teamMember[0].image;
+    if (filePath && filePath !== image) {
+      await deleteFile(filePath);
+    }
 
     const [result] = await connection.query(
       `UPDATE teams SET image = ?, name = ?, descriptions = ?, role = ? WHERE id = ?`,
@@ -181,6 +196,20 @@ router.delete("/", auth, async (req, res) => {
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [teamMember] = await connection.query(
+      "SELECT * FROM teams WHERE id = ?",
+      [id]
+    );
+
+    if (teamMember.length === 0) {
+      return res.status(200).json({ msg: "Team member not found" });
+    }
+
+    const filePath = teamMember[0].image;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
 
     // Get the current index of the team member to be deleted
     const [result] = await connection.query(
