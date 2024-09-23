@@ -1,17 +1,18 @@
 import express from "express";
 import pool from "../../../db/index.js";
 import auth from "../../../middleware/auth.js";
+import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
   let connection;
   try {
-    const { name, description } = req.body;
+    const { name, description, image } = req.body;
     connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
-      `INSERT INTO missions (name, description) VALUES (?, ?)`,
-      [name, description]
+      `INSERT INTO missions (name, description, image) VALUES (?, ?, ?)`,
+      [name, description, image]
     );
     await connection.commit();
     res.status(201).json({ message: "Mission is submitted" });
@@ -43,14 +44,27 @@ router.put("/", auth, async (req, res) => {
   let connection;
   try {
     const { id } = req.query;
-    const { name, description } = req.body;
+    const { name, description, image } = req.body;
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [mission] = await connection.query(
+      "SELECT * FROM missions WHERE id = ?",
+      [id]
+    );
+
+    if (mission.length === 0) {
+      return res.status(404).json({ msg: "Mission not found." });
+    }
+    const filePath = mission[0].image;
+    if (filePath && filePath !== image) {
+      await deleteFile(filePath);
+    }
+
     const [result] = await connection.query(
-      `UPDATE missions SET name = ?, description = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
-      [name, description, id]
+      `UPDATE missions SET name = ?, description = ?, image = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+      [name, description, image, id]
     );
 
     if (result.affectedRows === 0) {
@@ -75,6 +89,19 @@ router.delete("/", auth, async (req, res) => {
     const { id } = req.query;
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
+    const [mission] = await connection.query(
+      "SELECT * FROM missions WHERE id = ?",
+      [id]
+    );
+
+    if (mission.length === 0) {
+      return res.status(404).json({ msg: "Mission not found." });
+    }
+    const filePath = mission[0].image;
+    if (filePath) {
+      await deleteFile(filePath);
+    }
 
     const [result] = await connection.query(
       `DELETE FROM missions WHERE id = ?`,
