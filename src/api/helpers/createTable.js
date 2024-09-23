@@ -252,6 +252,18 @@ CREATE TABLE IF NOT EXISTS formsButtons (
 );
 `;
 
+const createFormButtonStatusTable = `
+CREATE TABLE IF NOT EXISTS formsButtonStatus (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    buttonTxt VARCHAR(255) NOT NULL,
+    hidden BOOLEAN DEFAULT FALSE,
+    formId INT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (formId) REFERENCES forms(id) ON DELETE CASCADE
+);
+`;
+
 const createMissionTable = `
 CREATE TABLE IF NOT EXISTS missions (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -331,6 +343,7 @@ export const createTables = async () => {
     await connection.query(createFooterTable);
     await connection.query(createMediaLinkTable);
     await connection.query(createDonateTabTable);
+    await connection.query(createFormButtonStatusTable);
     connection.release();
     console.log("Tables created successfully");
   } catch (err) {

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
   try {
-    const { description, tabs } = req.body;
+    const { description, tabs, buttonStatus } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     const [formResult] = await connection.query(
@@ -18,6 +18,13 @@ router.post("/", auth, async (req, res) => {
       await connection.query(
         `INSERT INTO formsButtons (buttonTxt, link, formId) VALUES (?, ?, ?)`,
         [tab.buttonTxt, tab.link, formId]
+      );
+    }
+
+    for (const button of buttonStatus) {
+      await connection.query(
+        `INSERT INTO formsButtonStatus (buttonTxt, hidden, formId) VALUES (?, ?, ?)`,
+        [button.buttonTxt, button.hidden, formId]
       );
     }
     await connection.commit();
@@ -34,11 +41,15 @@ router.get("/", async (req, res) => {
     const connection = await pool.getConnection();
     const [form] = await connection.query("SELECT * FROM forms");
     const [formButton] = await connection.query("SELECT * FROM formsButtons");
+    const [buttonStatus] = await connection.query(
+      "SELECT * FROM formsButtonStatus"
+    );
     connection.release();
     const response = form.map((val) => {
       return {
         ...val,
         formButton: formButton.filter((x) => x.formId === val.id),
+        buttonStatus: buttonStatus.filter((x) => x.formId === val.id),
       };
     });
     res.status(200).json(response);
@@ -50,7 +61,7 @@ router.get("/", async (req, res) => {
 
 router.put("/", auth, async (req, res) => {
   const { id } = req.query; // Get form id from URL params
-  const { description, tabs } = req.body; // Get updated description and tabs from request body
+  const { description, tabs, buttonStatus } = req.body; // Get updated description and tabs from request body
   let connection;
 
   try {
@@ -65,7 +76,9 @@ router.put("/", auth, async (req, res) => {
 
     // Delete existing buttons related to this form
     await connection.query(`DELETE FROM formsButtons WHERE formId = ?`, [id]);
-
+    await connection.query(`DELETE FROM formsButtonStatus WHERE formId = ?`, [
+      id,
+    ]);
     // Insert new buttons if provided
     if (tabs && Array.isArray(tabs)) {
       for (const tab of tabs) {
@@ -76,6 +89,14 @@ router.put("/", auth, async (req, res) => {
       }
     }
 
+    if (buttonStatus && Array.isArray(buttonStatus)) {
+      for (const button of buttonStatus) {
+        await connection.query(
+          `INSERT INTO formsButtonStatus (buttonTxt, hidden, formId) VALUES (?, ?, ?)`,
+          [button.buttonTxt, button.hidden, id]
+        );
+      }
+    }
     // Commit transaction
     await connection.commit();
     res.status(200).json({ message: "Form and buttons updated successfully." });
@@ -97,7 +118,6 @@ router.delete("/", auth, async (req, res) => {
 
     // Delete the form (buttons will be deleted due to the foreign key constraint)
     await connection.query(`DELETE FROM forms WHERE id = ?`, [id]);
-
 
     await connection.commit();
     res.status(200).json({ message: "Form deleted successfully." });
