@@ -14,6 +14,12 @@ router.post("/", async (req, res) => {
 
     let results = [];
 
+    if (!searchTerm || searchTerm.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Search term cannot be empty.",
+      });
+    }
     for (let table of tables) {
       const tableName = Object.values(table)[0];
 
