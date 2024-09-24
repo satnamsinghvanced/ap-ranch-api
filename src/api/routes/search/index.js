@@ -15,8 +15,8 @@ router.post("/", async (req, res) => {
     let results = [];
 
     if (!searchTerm || searchTerm.trim() === "") {
-      return res.status(400).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "Search term cannot be empty.",
       });
     }
@@ -50,8 +50,8 @@ router.post("/", async (req, res) => {
       res.status(200).json({ success: true, data: results });
     } else {
       res
-        .status(404)
-        .json({ success: false, message: "No matching records found" });
+        .status(200)
+        .json({ success: true, message: "No matching records found" });
     }
   } catch (error) {
     console.error(error);
