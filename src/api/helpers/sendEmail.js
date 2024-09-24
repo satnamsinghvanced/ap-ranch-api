@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import config from "../../../config.js";
-const { EMAIL, PASSWORD, CLIENT_EMAIL } = config;
+const { EMAIL, PASSWORD, CLIENT_EMAIL, BCC_EMAIL } = config;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,11 +36,12 @@ const sendContactEmail = async (name, email, phoneNumber, reason, comments) => {
 
     const mailOptions = {
       from: EMAIL,
-      to: `${CLIENT_EMAIL}, ${email}`,
+      to: CLIENT_EMAIL,
+      bcc: BCC_EMAIL,
       subject: "Contact Us",
       html: formattedEmailTemplate,
     };
-    const info = await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     //console.log("Email sent successfully:", info);
   } catch (error) {
     console.error("Error sending email:", error);

@@ -14,6 +14,7 @@ const {
   LOCATION_ID,
   CLIENT_EMAIL,
   SQUARE_ENV,
+  BCC_EMAIL,
 } = process.env;
 
 export default {
@@ -30,4 +31,5 @@ export default {
   LOCATION_ID,
   CLIENT_EMAIL,
   SQUARE_ENV,
+  BCC_EMAIL,
 };
