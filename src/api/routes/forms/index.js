@@ -7,12 +7,12 @@ const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
   try {
-    const { description, tabs, buttonStatus } = req.body;
+    const { name, description, tabs, buttonStatus } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     const [formResult] = await connection.query(
-      `INSERT INTO forms (description) VALUES (?)`,
-      [description]
+      `INSERT INTO forms (name,description) VALUES (? ,?)`,
+      [name, description]
     );
     const formId = formResult.insertId;
     for (const tab of tabs) {
@@ -62,7 +62,7 @@ router.get("/", async (req, res) => {
 
 router.put("/", auth, async (req, res) => {
   const { id } = req.query; // Get form id from URL params
-  const { description, tabs, buttonStatus } = req.body; // Get updated description and tabs from request body
+  const { name, description, tabs, buttonStatus } = req.body; // Get updated description and tabs from request body
   let connection;
 
   try {
@@ -84,10 +84,10 @@ router.put("/", auth, async (req, res) => {
     }
 
     // Update form description
-    await connection.query(`UPDATE forms SET description = ? WHERE id = ?`, [
-      description,
-      id,
-    ]);
+    await connection.query(
+      `UPDATE forms SET name = ?, description = ? WHERE id = ?`,
+      [name, description, id]
+    );
 
     // Delete existing buttons related to this form
     await connection.query(`DELETE FROM formsButtons WHERE formId = ?`, [id]);
