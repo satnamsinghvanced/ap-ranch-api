@@ -5,9 +5,10 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection;
   try {
     const { name, image, facility } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     const [facilityData] = await connection.query(
       `INSERT INTO facilities (name, image) VALUES (?, ?)`,
@@ -22,17 +23,19 @@ router.post("/", auth, async (req, res) => {
       );
     }
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Data uploaded successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [facilityData] = await connection.query("SELECT * FROM facilities");
     const [facilityDetails] = await connection.query(
       "SELECT * FROM facilityDetails"
@@ -46,20 +49,21 @@ router.get("/", async (req, res) => {
         facility: facilityDetail,
       };
     });
-    connection.release();
     res.status(200).json(facility);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.put("/", auth, async (req, res) => {
   const { id } = req.query;
   const { name, image, facility } = req.body;
-
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [facilityData] = await connection.query(
@@ -108,21 +112,22 @@ router.put("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
     res
       .status(200)
       .json({ message: "Facility and details updated successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.delete("/", auth, async (req, res) => {
   const { id } = req.query; // Facility ID to delete
-
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [facilityData] = await connection.query(
@@ -153,13 +158,14 @@ router.delete("/", auth, async (req, res) => {
     await connection.query(`DELETE FROM facilities WHERE id = ?`, [id]);
 
     await connection.commit();
-    connection.release();
     res
       .status(200)
       .json({ message: "Facility and details deleted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 

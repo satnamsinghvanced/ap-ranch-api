@@ -6,9 +6,10 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+  let connection;
   try {
     const { name, email, phoneNumber, reason, comments } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     const [contactForm] = await connection.query(
       `INSERT INTO contactForms (name, email, phoneNumber, reason, comments) VALUES (?, ?, ?, ?, ?)`,
@@ -16,24 +17,23 @@ router.post("/", async (req, res) => {
     );
     await sendContactEmail(name, email, phoneNumber, reason, comments);
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Thank you for submit." });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/user-detail", auth, async (req, res) => {
   let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [mission] = await connection.query("SELECT * FROM contactForms");
     res.status(200).json(mission);
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }
@@ -59,41 +59,44 @@ router.delete("/user-detail", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }
 });
 
 router.post("/detail", auth, async (req, res) => {
+  let connection;
   try {
     const { description, contact, image } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
       `INSERT INTO contactDetailForms (description,contact,image) VALUES (?, ?, ?)`,
       [description, contact, image]
     );
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Contact Detail submitted." });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [contactDetail] = await connection.query(
       "SELECT * FROM contactDetailForms"
     );
-    connection.release();
     res.status(200).json(contactDetail);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
 
@@ -132,16 +135,16 @@ router.put("/", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.error(err);
   } finally {
     if (connection) connection.release();
   }
 });
 
 router.delete("/", auth, async (req, res) => {
+  let connection;
   try {
     const { id } = req.query;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [contactDetail] = await connection.query(
@@ -166,13 +169,13 @@ router.delete("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "Contact detail deleted successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 

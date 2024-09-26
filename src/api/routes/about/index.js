@@ -5,36 +5,40 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+    let connection;
   try {
     const { image, name, descriptions } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
       `INSERT INTO abouts (image, name, descriptions) VALUES (?, ?, ?)`,
       [image, name, descriptions]
     );
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "About added successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+    let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [about] = await connection.query("SELECT * FROM abouts");
-    connection.release();
     res.status(200).json(about);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.put("/", auth, async (req, res) => {
+    let connection;
   const { id } = req.query;
   const { image, name, descriptions } = req.body;
 
@@ -44,7 +48,7 @@ router.put("/", auth, async (req, res) => {
   }
 
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [about] = await connection.query(
@@ -70,21 +74,21 @@ router.put("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "About updated successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.delete("/", auth, async (req, res) => {
   const { id } = req.query;
-
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [about] = await connection.query(
@@ -109,13 +113,14 @@ router.delete("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "About deleted successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 

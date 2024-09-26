@@ -5,6 +5,7 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection;
   try {
     const {
       servicesImage,
@@ -14,7 +15,7 @@ router.post("/", auth, async (req, res) => {
       providedServices,
     } = req.body;
 
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     const [serviceResult] = await connection.query(
       `INSERT INTO services (serviceDescriptions, servicesImage, servicesName) VALUES (?, ?, ?)`,
@@ -38,17 +39,19 @@ router.post("/", auth, async (req, res) => {
       );
     }
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Data uploaded successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [services] = await connection.query("SELECT * FROM services");
     const [images] = await connection.query("SELECT * FROM serviceImages");
     const [providedServices] = await connection.query(
@@ -70,18 +73,19 @@ router.get("/", async (req, res) => {
         providedServices: serviceProvidedDetails,
       };
     });
-    connection.release();
     res.status(200).json(servicesWithDetails);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/detail", async (req, res) => {
   const { serviceId } = req.query;
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
     // Fetch the specific service by ID
     const [service] = await connection.query(
@@ -90,7 +94,6 @@ router.get("/detail", async (req, res) => {
     );
 
     if (service.length === 0) {
-      connection.release();
       return res.status(404).json({ msg: "Service not found" });
     }
 
@@ -112,16 +115,17 @@ router.get("/detail", async (req, res) => {
       providedServices,
     };
 
-    connection.release();
     res.status(200).json(serviceWithDetails);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.put("/", auth, async (req, res) => {
   const { serviceId } = req.query;
+  let connection;
   const {
     servicesImage,
     servicesName,
@@ -131,7 +135,7 @@ router.put("/", auth, async (req, res) => {
   } = req.body;
 
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [service] = await connection.query(
@@ -140,7 +144,6 @@ router.put("/", auth, async (req, res) => {
     );
 
     if (service.length === 0) {
-      connection.release();
       return res.status(200).json({ msg: "Service not found" });
     }
 
@@ -192,20 +195,20 @@ router.put("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
     res.status(200).json({ message: "Data updated successfully" });
   } catch (err) {
     await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.delete("/", auth, async (req, res) => {
   const { serviceId } = req.query;
-
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [service] = await connection.query(
@@ -214,7 +217,6 @@ router.delete("/", auth, async (req, res) => {
     );
 
     if (service.length === 0) {
-      connection.release();
       return res.status(200).json({ msg: "Service not found" });
     }
 
@@ -247,12 +249,12 @@ router.delete("/", auth, async (req, res) => {
     await connection.query(`DELETE FROM services WHERE id = ?`, [serviceId]);
 
     await connection.commit();
-    connection.release();
     res.status(200).json({ message: "Data deleted successfully" });
   } catch (err) {
     await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 

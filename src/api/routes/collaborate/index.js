@@ -5,39 +5,42 @@ import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection; 
   try {
     const { name, descriptions, headerImage, image } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
       `INSERT INTO collaborates (name, descriptions, headerImage, image) VALUES (?, ?, ?, ?)`,
       [name, descriptions, headerImage, image]
     );
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Collaborate added successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection; 
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [collaborate] = await connection.query("SELECT * FROM collaborates");
-    connection.release();
     res.status(200).json(collaborate);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/detail", async (req, res) => {
   const { id } = req.query;
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [collaborate] = await connection.query(
       "SELECT * FROM collaborates WHERE id = ?",
       [id]
@@ -46,19 +49,20 @@ router.get("/detail", async (req, res) => {
     if (collaborate.length === 0) {
       return res.status(404).json({ msg: "Collaboration not found" });
     }
-    connection.release();
     res.status(200).json(collaborate[0]);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
-  }
+  }finally {
+    if (connection) connection.release();
+}
 });
 
 router.put("/", auth, async (req, res) => {
+  let connection;
   try {
     const { id } = req.query;
     const { name, descriptions, headerImage, image } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [collaborate] = await connection.query(
@@ -84,7 +88,6 @@ router.put("/", auth, async (req, res) => {
     );
 
     await connection.commit();
-    connection.release();
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Collaborate not found" });
@@ -93,14 +96,16 @@ router.put("/", auth, async (req, res) => {
     res.status(200).json({ message: "Collaborate updated successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
-  }
+  }finally {
+    if (connection) connection.release();
+}
 });
 
 router.delete("/", auth, async (req, res) => {
+  let connection;
   try {
     const { id } = req.query;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [collaborate] = await connection.query(
@@ -125,7 +130,6 @@ router.delete("/", auth, async (req, res) => {
     );
 
     await connection.commit();
-    connection.release();
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Collaborate not found" });
@@ -134,8 +138,9 @@ router.delete("/", auth, async (req, res) => {
     res.status(200).json({ message: "Collaborate deleted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
-  }
+  }finally {
+    if (connection) connection.release();
+}
 });
 
 export default router;

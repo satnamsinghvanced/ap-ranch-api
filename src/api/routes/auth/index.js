@@ -20,13 +20,14 @@ router.post(
     ).isLength({ min: 8 }),
   ],
   async (req, res) => {
+      let connection;
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
       const { name, email, password } = req.body;
-      const connection = await pool.getConnection();
+      connection = await pool.getConnection();
       await connection.beginTransaction();
       const [existingEmail] = await connection.query(
         "SELECT * FROM auth WHERE email = ?",
@@ -42,11 +43,11 @@ router.post(
         [name, email, hashedPassword]
       );
       await connection.commit();
-      connection.release();
       res.status(201).json({ message: "User created." });
     } catch (err) {
       res.status(500).json({ msg: "Server error" });
-      console.log(err);
+    } finally {
+        if (connection) connection.release();
     }
   }
 );
@@ -58,9 +59,10 @@ router.post(
     check("password", "Password is required").exists(),
   ],
   async (req, res) => {
+    let connection;
     try {
       const { email, password } = req.body;
-      const connection = await pool.getConnection();
+      connection = await pool.getConnection();
       const [user] = await connection.query(
         "SELECT * FROM auth WHERE email = ?",
         [email]
@@ -86,7 +88,9 @@ router.post(
     } catch (err) {
       console.error(err.message);
       res.status(401).send({ msg: err.message });
-    }
+    } finally {
+      if (connection) connection.release();
+  }
   }
 );
 

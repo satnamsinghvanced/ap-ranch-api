@@ -5,9 +5,10 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection;
   try {
     const { image, name, descriptions, role, sortIndex } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     const [existingEntries] = await connection.query(
       `SELECT * FROM teams WHERE sortIndex  >= ? ORDER BY sortIndex  ASC`,
@@ -28,31 +29,34 @@ router.post("/", auth, async (req, res) => {
       [image, name, descriptions, role, sortIndex]
     );
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Team member added successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [teamMembers] = await connection.query(
       "SELECT * FROM teams ORDER BY sortIndex ASC"
     );
-    connection.release();
     res.status(200).json(teamMembers);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 router.get("/detail", async (req, res) => {
   const { id } = req.query;
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [teamMember] = await connection.query(
       "SELECT * FROM teams WHERE id = ?",
       [id]
@@ -62,24 +66,24 @@ router.get("/detail", async (req, res) => {
       return res.status(404).json({ msg: "Team member not found" });
     }
 
-    connection.release();
     res.status(200).json(teamMember[0]);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 router.put("/", auth, async (req, res) => {
   const { id } = req.query;
   const { image, name, descriptions, role } = req.body;
-
+  let connection;
   // Check if the required fields are present
   if (!image || !name || !descriptions || !role) {
     return res.status(400).json({ msg: "All fields are required" });
   }
 
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [teamMember] = await connection.query(
@@ -106,13 +110,13 @@ router.put("/", auth, async (req, res) => {
     }
 
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "Team member updated successfully" });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
@@ -154,7 +158,6 @@ router.put("/update-index", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }
@@ -238,7 +241,6 @@ router.delete("/", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }

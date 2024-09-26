@@ -4,6 +4,7 @@ import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+  let connection;
   try {
     const {
       name,
@@ -16,7 +17,7 @@ router.post("/", async (req, res) => {
       dateSigned,
       sign,
     } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
       `INSERT INTO indemnityAgreements (name,
@@ -41,47 +42,48 @@ router.post("/", async (req, res) => {
       ]
     );
     await connection.commit();
-    connection.release();
     res
       .status(201)
       .json({ message: "Indemnity Agreement submitted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [agreements] = await connection.query(
       "SELECT * FROM indemnityAgreements"
     );
-    connection.release();
     res.status(200).json(agreements);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/detail", async (req, res) => {
   const { id } = req.query;
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [agreements] = await connection.query(
       "SELECT * FROM indemnityAgreements WHERE id = ?",
       [id]
     );
     if (agreements.length === 0) {
-      connection.release();
       return res.status(404).json({ msg: "Agreements not found" });
     }
-    connection.release();
     res.status(200).json(agreements);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 

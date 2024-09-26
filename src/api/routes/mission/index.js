@@ -28,7 +28,7 @@ router.post("/", auth, async (req, res) => {
 router.get("/", async (req, res) => {
   let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [mission] = await connection.query("SELECT * FROM missions");
     res.status(200).json(mission);
   } catch (err) {
@@ -118,7 +118,6 @@ router.delete("/", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }

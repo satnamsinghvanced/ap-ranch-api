@@ -6,9 +6,10 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection;
   try {
     const { name, description, tabs, buttonStatus } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     const [formResult] = await connection.query(
       `INSERT INTO forms (name,description) VALUES (? ,?)`,
@@ -29,7 +30,6 @@ router.post("/", auth, async (req, res) => {
       );
     }
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Form is submitted." });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
@@ -38,14 +38,14 @@ router.post("/", auth, async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [form] = await connection.query("SELECT * FROM forms");
     const [formButton] = await connection.query("SELECT * FROM formsButtons");
     const [buttonStatus] = await connection.query(
       "SELECT * FROM formsButtonStatus"
     );
-    connection.release();
     const response = form.map((val) => {
       return {
         ...val,
@@ -57,10 +57,13 @@ router.get("/", async (req, res) => {
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.put("/", auth, async (req, res) => {
+
   const { id } = req.query; // Get form id from URL params
   const { name, description, tabs, buttonStatus } = req.body; // Get updated description and tabs from request body
   let connection;

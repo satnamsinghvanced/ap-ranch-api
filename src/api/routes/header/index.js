@@ -27,7 +27,7 @@ router.post("/", auth, async (req, res) => {
 router.get("/", async (req, res) => {
   let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [header] = await connection.query("SELECT * FROM headers");
     res.status(200).json(header);
   } catch (err) {

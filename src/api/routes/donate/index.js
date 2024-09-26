@@ -93,7 +93,6 @@ router.post("/", async (req, res) => {
         [paymentId, firstName, lastName, phone, email, state, amount, status]
       );
       await connection.commit();
-      connection.release();
       return res.status(200).json({
         message: "Payment successful",
       });
@@ -108,6 +107,8 @@ router.post("/", async (req, res) => {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
 

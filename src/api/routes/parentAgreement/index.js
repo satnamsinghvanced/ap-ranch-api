@@ -4,56 +4,58 @@ import auth from "../../../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+  let connection;
   try {
     const { name, ageDivision, dateSigned, sign } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     await connection.query(
       `INSERT INTO parentsAgreements (name, ageDivision, dateSigned, sign) VALUES (?, ?, ?, ?)`,
       [name, ageDivision, dateSigned, sign]
     );
     await connection.commit();
-    connection.release();
     res
       .status(201)
       .json({ message: "Parent Agreement submitted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [agreements] = await connection.query(
       "SELECT * FROM parentsAgreements"
     );
-    connection.release();
     res.status(200).json(agreements);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/detail", async (req, res) => {
   const { id } = req.query;
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [agreements] = await connection.query(
       "SELECT * FROM parentsAgreements WHERE id = ?",
       [id]
     );
     if (agreements.length === 0) {
-      connection.release();
       return res.status(404).json({ msg: "Agreements not found" });
     }
-    connection.release();
     res.status(200).json(agreements);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
@@ -78,7 +80,6 @@ router.delete("/", auth, async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
   } finally {
     if (connection) connection.release();
   }

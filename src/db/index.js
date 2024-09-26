@@ -9,6 +9,10 @@ const pool = mysql
     password: MYSQL_PASSWORD,
     database: MYSQL_DATABASE,
     port: DB_PORT,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    acquireTimeout: 10000,
   })
   .promise();
 pool.getConnection((err, connection) => {

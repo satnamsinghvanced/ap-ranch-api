@@ -6,9 +6,10 @@ import deleteFile from "../../helpers/deleteMedia.js";
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
+  let connection;
   try {
     const { donate, partnerLogo, banner } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
     // Insert into banner table
     const [bannerResult] = await connection.query(
@@ -31,25 +32,26 @@ router.post("/", auth, async (req, res) => {
       [bannerId, donate.text, donate.buttonText, donate.image]
     );
     await connection.commit();
-    connection.release();
     console.log("Data inserted successfully");
 
     res.status(201).json({ message: "Data and images uploaded successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
     // Fetch all banners
     const [banners] = await connection.query("SELECT * FROM banners");
 
     if (banners.length === 0) {
-      connection.release();
       return res.status(404).json({ message: "No banners found" });
     }
 
@@ -59,7 +61,6 @@ router.get("/", async (req, res) => {
     // Fetch all donate information
     const [donates] = await connection.query("SELECT * FROM donates");
 
-    connection.release();
 
     //Construct response object
     // const response = {
@@ -82,15 +83,16 @@ router.get("/", async (req, res) => {
     res.status(200).json(response);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.error("Error fetching data:", err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.get("/detail", async (req, res) => {
   const { bannerId } = req.query;
-
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
     // Fetch banner details
     const [bannerRows] = await connection.query(
@@ -99,7 +101,6 @@ router.get("/detail", async (req, res) => {
     );
 
     if (bannerRows.length === 0) {
-      connection.release();
       return res.status(404).json({ message: "Banner not found" });
     }
 
@@ -117,8 +118,6 @@ router.get("/detail", async (req, res) => {
       [bannerId]
     );
 
-    connection.release();
-
     // Construct response object
     const response = {
       banner,
@@ -130,18 +129,19 @@ router.get("/detail", async (req, res) => {
     res.status(200).json(response);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.error("Error fetching data:", err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.delete("/", auth, async (req, res) => {
   const { bannerId } = req.query;
-
+  let connection;
   if (!bannerId) {
     return res.status(400).json({ msg: "Banner ID is required" });
   }
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [bannerData] = await connection.query(
@@ -194,24 +194,25 @@ router.delete("/", auth, async (req, res) => {
       bannerId,
     ]);
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "Record deleted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.error("Error deleting record:", err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
 router.put("/", auth, async (req, res) => {
   const { bannerId } = req.query;
+  let connection;
   if (!bannerId) {
     return res.status(400).json({ msg: "Banner ID is required" });
   }
   const { banner, partnerLogo, donate } = req.body;
 
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     const [bannerData] = await connection.query(
@@ -278,12 +279,12 @@ router.put("/", auth, async (req, res) => {
       [donate.text, donate.buttonText, donate.image, bannerId]
     );
     await connection.commit();
-    connection.release();
 
     res.status(200).json({ message: "Record updated successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
-    console.error("Error updating record:", err);
+  }finally {
+    if (connection) connection.release();
   }
 });
 
