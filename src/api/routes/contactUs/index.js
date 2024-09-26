@@ -66,20 +66,25 @@ router.delete("/user-detail", auth, async (req, res) => {
 });
 
 router.post("/detail", auth, async (req, res) => {
+  let connection;
   try {
     const { description, contact, image } = req.body;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
+
     await connection.query(
-      `INSERT INTO contactDetailForms (description,contact,image) VALUES (?, ?, ?)`,
+      `INSERT INTO contactDetailForms (description, contact, image) VALUES (?, ?, ?)`,
       [description, contact, image]
     );
+
     await connection.commit();
-    connection.release();
     res.status(201).json({ message: "Contact Detail submitted." });
   } catch (err) {
+    if (connection) await connection.rollback(); // Rollback transaction on error
     res.status(500).json({ msg: "Server error" });
-    console.log(err);
+    console.error(err);
+  } finally {
+    if (connection) connection.release(); // Always release the connection
   }
 });
 
