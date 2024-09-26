@@ -70,18 +70,17 @@ router.post("/detail", auth, async (req, res) => {
     const { description, contact, image } = req.body;
     connection = await pool.getConnection();
     await connection.beginTransaction();
-
     await connection.query(
-      `INSERT INTO contactDetailForms (description, contact, image) VALUES (?, ?, ?)`,
+      `INSERT INTO contactDetailForms (description,contact,image) VALUES (?, ?, ?)`,
       [description, contact, image]
     );
-
     await connection.commit();
     res.status(201).json({ message: "Contact Detail submitted." });
   } catch (err) {
-    if (connection) await connection.rollback(); // Rollback transaction on error
     res.status(500).json({ msg: "Server error" });
     console.log(err);
+  } finally {
+    if (connection) connection.release();
   }
 });
 
