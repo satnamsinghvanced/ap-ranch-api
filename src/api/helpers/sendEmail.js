@@ -38,7 +38,7 @@ const sendContactEmail = async (name, email, phoneNumber, reason, comments) => {
       from: EMAIL,
       to: CLIENT_EMAIL,
       bcc: BCC_EMAIL,
-      subject: "Contact Us",
+      subject: `Contact Us ${name}`,
       html: formattedEmailTemplate,
     };
     await transporter.sendMail(mailOptions);
