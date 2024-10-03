@@ -36,9 +36,13 @@ router.post("/", async (req, res) => {
         );
 
         if (rows.length > 0 && rows[0].hasOwnProperty("page_name")) {
+            let id = rows[0]["id"];
+            if(tableName == "serviceProvided"){
+                id = rows[0]["serviceId"];
+            }
           results.push({
             tableName: tableName,
-            id: rows[0]["id"],
+            id: id,
             page_name: rows[0]["page_name"],
             content: rows[0][columnName],
           });
