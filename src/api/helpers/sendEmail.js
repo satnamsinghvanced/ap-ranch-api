@@ -3,7 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import config from "../../../config.js";
-const { EMAIL, PASSWORD, CLIENT_EMAIL, BCC_EMAIL } = config;
+const { EMAIL, PASSWORD, CLIENT_EMAIL, BCC_EMAIL, EMAIL_HOST, EMAIL_PORT } =
+  config;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,8 +26,8 @@ const sendContactEmail = async (name, email, phoneNumber, reason, comments) => {
 
     const transporter = nodemailer.createTransport({
       //service: "gmail",
-      host: "mail.apranch.org",
-      port: 465,
+      host: EMAIL_HOST,
+      port: EMAIL_PORT,
       secure: true, // true for SSL, false for TLS
       auth: {
         user: EMAIL,

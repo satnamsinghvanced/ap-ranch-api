@@ -15,6 +15,8 @@ const {
   CLIENT_EMAIL,
   SQUARE_ENV,
   BCC_EMAIL,
+  EMAIL_HOST,
+  EMAIL_PORT,
 } = process.env;
 
 export default {
@@ -32,4 +34,6 @@ export default {
   CLIENT_EMAIL,
   SQUARE_ENV,
   BCC_EMAIL,
+  EMAIL_HOST,
+  EMAIL_PORT,
 };
