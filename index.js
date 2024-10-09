@@ -21,7 +21,7 @@ app.use((err, req, res, next) => {
 });
 
 app.get("/api/testing", async (req, res) => {
-  res.send("Working 0.1");
+  res.send("Working 0.2");
 });
 
 app.use("/api", routes);
